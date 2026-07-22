@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Grower Circle — Retail Portal (Executive Demo)</title>
+<style>
+  :root{
+    /* The Grower Circle brand system — black/white dominant, forest green accent only */
+    --brand-black:#050505; --brand-charcoal:#121212; --brand-panel:#191919;
+    --brand-white:#FFFFFF; --brand-off-white:#F4F3EF;
+    --brand-green:#355E2E; --brand-green-dark:#1E3A22; --brand-green-muted:#748A6A;
+    --brand-border-dark:#2C2C2C; --brand-border-light:#D8D8D3; --brand-text-muted:#A9A9A3;
+    /* Aliases used throughout this file (repoint here to retheme) */
+    --ink:var(--brand-black); --paper:var(--brand-white); --forest:var(--brand-green);
+    --forest-deep:var(--brand-green-dark); --forest-soft:#4A6B40; --mist:var(--brand-off-white);
+    --line:var(--brand-border-light); --muted:#5B5B55;
+    --gold:#8A7B5C; --danger:#7A2E2E; --warn:#8A7B5C; --radius:12px;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:var(--sans);color:var(--ink);background:var(--mist);-webkit-font-smoothing:antialiased}
+  button{font-family:inherit;cursor:pointer}
+  .demo-banner{background:var(--brand-black);color:var(--brand-off-white);text-align:center;font-size:12px;font-weight:600;
+    letter-spacing:.12em;text-transform:uppercase;padding:7px 12px;border-bottom:1px solid var(--brand-green)}
+  .shell{max-width:1120px;margin:0 auto;padding:0 16px}
+  /* Top bar */
+  .topbar{background:var(--ink);color:var(--paper)}
+  .topbar .row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand .name{font-weight:600;letter-spacing:.01em}
+  .brand .motto{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--brand-green-muted)}
+  .mark{width:38px;height:38px;flex:0 0 38px}
+  .whoami{display:flex;align-items:center;gap:10px;font-size:13px}
+  .pill{font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid #35463f;color:#cfe0d7}
+  .btn{border:none;border-radius:10px;padding:10px 14px;font-weight:600;font-size:14px}
+  .btn-primary{background:var(--forest);color:#fff}
+  .btn-primary:hover{background:var(--forest-deep)}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+  .btn-ghost.dark{border-color:#35463f;color:#cfe0d7}
+  .btn-sm{padding:7px 11px;font-size:13px}
+  .btn-danger{background:#fff;border:1px solid var(--danger);color:var(--danger)}
+  .btn-warn{background:#fff;border:1px solid var(--warn);color:var(--warn)}
+  /* Nav tabs */
+  .tabs{display:flex;gap:4px;overflow:auto;padding:10px 0}
+  .tab{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:999px;
+    padding:8px 14px;font-size:13px;font-weight:600;white-space:nowrap}
+  .tab.active{background:var(--forest);border-color:var(--forest);color:#fff}
+  /* Layout */
+  main{padding:18px 0 60px}
+  .grid{display:grid;gap:16px}
+  .cols-2{grid-template-columns:repeat(2,1fr)}
+  .cols-3{grid-template-columns:repeat(3,1fr)}
+  .cols-4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:820px){.cols-2,.cols-3,.cols-4{grid-template-columns:1fr}}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+  .card h3{margin:0 0 4px;font-size:15px}
+  .card .sub{color:var(--muted);font-size:13px;margin:0 0 12px}
+  .stat{font-size:30px;font-weight:700;letter-spacing:-.02em}
+  .stat.forest{color:var(--forest)}
+  .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  .h1{font-size:22px;font-weight:700;margin:0 0 2px;letter-spacing:-.01em}
+  .lede{color:var(--muted);margin:0 0 18px}
+  .badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:.03em}
+  .b-working{background:#E7EEE4;color:#1E3A22}
+  .b-partial{background:#EFE9DC;color:#6E5E3C}
+  .b-demo{background:#ECEBE6;color:#55554F}
+  .b-planned{background:#E6E6E1;color:#3A3A36}
+  .row-between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .status{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;display:inline-block}
+  .s-submitted{background:#ECEBE6;color:#55554F}
+  .s-review{background:#E8E8E3;color:#4E4E48}
+  .s-flagged{background:#F1E4E4;color:#7A2E2E}
+  .s-info{background:#EFE9DC;color:#6E5E3C}
+  .s-approved{background:#E7EEE4;color:#1E3A22}
+  .s-rejected{background:#EFE1E1;color:#5E1F1F}
+  .progress{height:12px;background:var(--mist);border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+  .progress > span{display:block;height:100%;background:var(--brand-green)}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+  .field input,.field select,.field textarea{width:100%;padding:11px 12px;border:1px solid var(--line);
+    border-radius:10px;font-size:14px;font-family:inherit;background:#fff}
+  .hint{font-size:12px;color:var(--muted);margin-top:5px}
+  .required{color:var(--danger)}
+  .drop{border:1.5px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--muted);
+    background:var(--mist);font-size:14px}
+  .callout{border-left:3px solid var(--forest);background:var(--mist);padding:12px 14px;border-radius:8px;font-size:14px}
+  .callout.warn{border-color:var(--warn);background:#F7F3EA}
+  .callout.danger{border-color:var(--danger);background:#F7ECEC}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;
+    padding:12px 18px;border-radius:12px;font-size:14px;box-shadow:0 8px 30px rgba(0,0,0,.25);opacity:0;
+    transition:opacity .25s, transform .25s;pointer-events:none;z-index:60;max-width:90%}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+  /* Login */
+  .login-wrap{min-height:calc(100vh - 120px);display:flex;align-items:center;justify-content:center;padding:20px}
+  .login-card{background:#fff;border:1px solid var(--line);border-radius:20px;max-width:420px;width:100%;padding:28px;
+    box-shadow:0 12px 40px rgba(5,5,5,.10)}
+  .login-hero{background:var(--brand-black);border:1px solid var(--brand-border-dark);border-left:3px solid var(--brand-green);
+    border-radius:16px;padding:22px;color:#eaf3ee;margin-bottom:20px}
+  .login-hero .motto{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--brand-green-muted)}
+  .demo-cred{display:flex;gap:8px;margin-top:10px}
+  .demo-cred button{flex:1;text-align:left;border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px}
+  .demo-cred small{display:block;color:var(--muted);font-size:12px}
+  .roadmap-step{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line)}
+  .dot{width:26px;height:26px;border-radius:999px;flex:0 0 26px;display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;color:#fff;background:var(--forest)}
+  .dot.soft{background:var(--forest-soft)} .dot.plan{background:#555550}
+  .kpi-mini{font-size:12px;color:var(--muted)}
+  .footer{color:var(--muted);font-size:12px;text-align:center;padding:20px}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+  /* Guide */
+  .guide{position:fixed;right:16px;bottom:16px;z-index:50;max-width:320px}
+  .guide .panel{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.18);
+    padding:14px;display:none}
+  .guide.open .panel{display:block}
+  .guide .fab{background:var(--forest);color:#fff;border:none;border-radius:999px;padding:12px 16px;font-weight:700;
+    box-shadow:0 8px 24px rgba(5,5,5,.30)}
+  .guide ol{margin:8px 0 0;padding-left:18px;font-size:13px;color:#333}
+  .guide li{margin-bottom:6px}
+  .guide li.done{color:var(--muted);text-decoration:line-through}
+</style>
+</head>
+<body>
+<div class="demo-banner">Demo Mode — sample data only · no real accounts, emails, or database writes</div>
+
+<div id="app"></div>
+
+<div class="toast" id="toast"></div>
+
+<div class="guide" id="guide">
+  <div class="panel">
+    <div class="row-between"><strong style="font-size:14px">5-Minute Walkthrough</strong>
+      <button class="btn btn-ghost btn-sm" onclick="toggleGuide()">Hide</button></div>
+    <ol id="guideSteps">
+      <li data-k="login">Log in as a Certified Dealer</li>
+      <li data-k="dealerDash">Review current sales &amp; reward tier</li>
+      <li data-k="submit">Submit a sample verified sale</li>
+      <li data-k="adminLogin">Switch to Retail Program Admin</li>
+      <li data-k="queue">Open the sales review queue</li>
+      <li data-k="dup">See a duplicate warning</li>
+      <li data-k="approve">Approve the sample sale</li>
+      <li data-k="reward">Watch XP &amp; reward progress update</li>
+      <li data-k="fulfill">Check reward fulfillment tracking</li>
+      <li data-k="roadmap">View the expansion roadmap</li>
+    </ol>
+  </div>
+  <div style="text-align:right;margin-top:8px"><button class="fab" onclick="toggleGuide()">Guide</button></div>
+</div>
+
+<script>
+/* ============================================================
+   The Grower Circle — Executive Demo (Demo Mode)
+   Self-contained. All data below is mock sample data. No network,
+   no storage, no database writes. For meeting demonstration only.
+   ============================================================ */
+
+const MARK = `<svg class="mark" viewBox="0 0 48 48" aria-label="The Grower Circle">
+  <circle cx="24" cy="24" r="23" fill="var(--forest)"/>
+  <circle cx="24" cy="24" r="23" fill="none" stroke="#fff" stroke-width="1.5"/>
+  <path d="M24 12c3 4 3 7 1.5 10.5C28 21 30 20 32 20c-1 4-4 6-7 6.5V36h-2v-9.5c-3-.5-6-2.5-7-6.5 2 0 4 1 6.5 2.5C15 19 15 16 18 12c1.5 2 3 3.5 3 6 0-3 1.5-4.5 3-6z" fill="#fff"/>
+</svg>`;
+
+// ---- Mock data ----
+const TIERS = [
+  {min:10,  reward:"5 prerolls"},
+  {min:25,  reward:"Premium eighth"},
+  {min:50,  reward:"Premium eighth + Flight Bites"},
+  {min:75,  reward:"Choice reward"},
+  {min:100, reward:"Platinum Mystery Box + limited merch entry"},
+  {min:150, reward:"Elite Mystery Box + quarter-end VIP entry"},
+];
+const XP_PER_UNIT = 10;
+
+const state = {
+  role:null,                 // 'dealer' | 'admin'
+  monthlyUnits:22,           // dealer's approved units this month
+  lifetimeUnits:214,
+  guide:{},                  // completed guide steps
+};
+
+const dealer = {
+  name:"Jordan Rivera", preferred:"Jordan", store:"Sample Cannabis Co — Strip",
+  status:"Active", region:"Las Vegas", ig:"@jordan_buds", discord:"jordan#0044",
+};
+
+let submissions = [
+  {id:"S-1042", dealer:"Jordan Rivera", store:"Sample Cannabis Co — Strip", brand:"The Grower Circle",
+   product:"Signature Flower 3.5g", qty:6, date:"2026-07-19", time:"18:40", receipt:"R-88213",
+   proof:"Customer receipt", status:"approved", flags:[]},
+  {id:"S-1050", dealer:"Jordan Rivera", store:"Sample Cannabis Co — Strip", brand:"The Grower Circle",
+   product:"Live Resin Cart 1g", qty:4, date:"2026-07-20", time:"20:15", receipt:"R-88240",
+   proof:"Reprinted receipt", status:"submitted", flags:[]},
+  {id:"S-1051", dealer:"Marcus Lee", store:"Sample Cannabis Co — Strip", brand:"The Grower Circle",
+   product:"Live Resin Cart 1g", qty:4, date:"2026-07-20", time:"20:15", receipt:"R-88240",
+   proof:"Customer receipt", status:"flagged",
+   flags:["Duplicate receipt R-88240", "Same store, date, time & product as S-1050", "Same transaction submitted by 2 dealers"]},
+  {id:"S-1052", dealer:"Priya Shah", store:"Downtown Dispensary", brand:"The Grower Circle",
+   product:"Infused Preroll 1g", qty:3, date:"2026-07-20", time:"15:30", receipt:"—",
+   proof:"BA verification", status:"under_review",
+   flags:["BA verification — manual confirmation required (no receipt image)"]},
+];
+
+const rewards = [
+  {month:"July 2026", tier:"Premium eighth (25)", status:"Prepared", fulfilledBy:"—", date:"—"},
+  {month:"June 2026", tier:"5 prerolls (10)", status:"Picked Up", fulfilledBy:"A. Nguyen", date:"2026-07-02"},
+];
+
+// ---- Helpers ----
+const $ = (id)=>document.getElementById(id);
+function money(n){return "$"+n.toLocaleString()}
+function statusPill(s){
+  const map={submitted:["s-submitted","Submitted"],under_review:["s-review","Under Review"],
+    flagged:["s-flagged","Flagged"],more_info:["s-info","More Info Requested"],
+    approved:["s-approved","Approved"],rejected:["s-rejected","Rejected"]};
+  const [c,l]=map[s]||["s-submitted",s]; return `<span class="status ${c}">${l}</span>`;
+}
+function currentTier(units){let t=null;for(const x of TIERS){if(units>=x.min)t=x}return t}
+function nextTier(units){for(const x of TIERS){if(units<x.min)return x}return null}
+function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600)}
+function markGuide(k){state.guide[k]=true;renderGuide()}
+function renderGuide(){document.querySelectorAll("#guideSteps li").forEach(li=>{
+  if(state.guide[li.dataset.k])li.classList.add("done")})}
+function toggleGuide(){$("guide").classList.toggle("open")}
+
+// Badges for honest feature labels
+const B={working:'<span class="badge b-working">Working</span>',
+  partial:'<span class="badge b-partial">Partially Working</span>',
+  demo:'<span class="badge b-demo">Demo Only</span>',
+  planned:'<span class="badge b-planned">Planned</span>'};
+
+// ---- Top chrome ----
+function chrome(active){
+  const tabs = state.role==="dealer"
+    ? [["dealerDash","Dashboard"],["submit","Submit Sale"],["history","History"],["rewards","Rewards"],["pilot","Pilot"],["roadmap","Roadmap"]]
+    : [["adminDash","Dashboard"],["queue","Review Queue"],["fulfill","Reward Fulfillment"],["pilot","Pilot"],["roadmap","Roadmap"]];
+  const who = state.role==="dealer"
+    ? `${dealer.preferred} · <span class="pill">Certified Dealer</span>`
+    : `A. Nguyen · <span class="pill">Retail Program Admin</span>`;
+  return `<div class="topbar"><div class="shell"><div class="row">
+      <div class="brand">${MARK}<div><div class="name">The Grower Circle</div>
+      <div class="motto">For Connoisseurs, By Connoisseurs</div></div></div>
+      <div class="whoami">${who}
+      <button class="btn btn-ghost dark btn-sm" onclick="logout()">Switch role</button></div>
+    </div></div></div>
+    <div class="shell"><div class="tabs">
+      ${tabs.map(([k,l])=>`<button class="tab ${active===k?'active':''}" onclick="go('${k}')">${l}</button>`).join("")}
+    </div></div>`;
+}
+
+// ============================================================
+// SCREENS
+// ============================================================
+function screenLogin(){
+  return `<div class="login-wrap"><div class="login-card">
+    <div class="login-hero"><div style="display:flex;gap:12px;align-items:center">${MARK}
+      <div><div style="font-weight:700;font-size:18px">The Grower Circle</div>
+      <div class="motto">For Connoisseurs, By Connoisseurs</div></div></div>
+      <p style="margin:14px 0 0;font-size:14px;color:#cfe0d7">Retail Portal · Las Vegas Pilot</p>
+    </div>
+    <div class="field"><label>Email</label><input value="demo@thegrowercircle.com" /></div>
+    <div class="field"><label>Password</label><input type="password" value="••••••••" /></div>
+    <button class="btn btn-primary" style="width:100%" onclick="toast('Demo Mode — pick a demo account below')">Sign in</button>
+    <p class="label" style="margin:18px 0 8px">Demo accounts (one click)</p>
+    <div class="demo-cred">
+      <button onclick="login('dealer')"><strong>Certified Dealer</strong>
+        <small>jordan@demo · Las Vegas</small></button>
+      <button onclick="login('admin')"><strong>Retail Program Admin</strong>
+        <small>admin@demo · Las Vegas</small></button>
+    </div>
+    <p class="hint" style="margin-top:16px">Email is the primary identity. Discord linking is optional in Version 1
+      and never blocks sign-in.</p>
+  </div></div>`;
+}
+
+function screenLanding(){
+  return `<div class="card" style="background:var(--brand-black);color:#eaf3ee;border:1px solid var(--brand-border-dark);border-left:3px solid var(--brand-green)">
+      <div class="label" style="color:var(--brand-green-muted)">Welcome back</div>
+      <div class="h1" style="color:#fff">${dealer.preferred}, here's your month at a glance</div>
+      <p class="lede" style="color:#cfe0d7">Log verified sales, upload proof, and track your monthly product rewards.</p>
+      <button class="btn btn-primary" onclick="go('submit')" style="background:#fff;color:var(--forest)">+ Submit a verified sale</button>
+    </div>`;
+}
+
+function screenDealerDash(){
+  const tier=currentTier(state.monthlyUnits), next=nextTier(state.monthlyUnits);
+  const pct = next? Math.min(100, Math.round(state.monthlyUnits/next.min*100)) : 100;
+  const remaining = next? next.min-state.monthlyUnits : 0;
+  markGuide("dealerDash");
+  return `${screenLanding()}
+  <div class="grid cols-4" style="margin-top:16px">
+    ${statCard("Monthly verified sales", state.monthlyUnits, "units this month")}
+    ${statCard("Lifetime verified sales", state.lifetimeUnits, "all-time units")}
+    ${statCard("Monthly XP", state.monthlyUnits*XP_PER_UNIT, XP_PER_UNIT+" XP / unit", true)}
+    ${statCard("Lifetime XP", state.lifetimeUnits*XP_PER_UNIT, "never resets", true)}
+  </div>
+  <div class="grid cols-2" style="margin-top:16px">
+    <div class="card">
+      <div class="row-between"><h3>Monthly reward progress</h3>${B.demo}</div>
+      <p class="sub">Current tier: <strong>${tier?tier.reward:"—"}</strong></p>
+      <div class="progress"><span style="width:${pct}%"></span></div>
+      <p class="hint">${next? `${remaining} more verified sales to reach <strong>${next.reward}</strong> (${next.min})`
+        : "Top tier reached this month 🎉"}</p>
+      <p class="hint">Reward rule: highest tier reached for the month (configurable).</p>
+    </div>
+    <div class="card">
+      <div class="row-between"><h3>Rewards</h3>${B.demo}</div>
+      <table><tbody>
+        ${rewards.map(r=>`<tr><td><strong>${r.tier}</strong><br><span class="kpi-mini">${r.month}</span></td>
+          <td style="text-align:right"><span class="status ${r.status==='Picked Up'?'s-approved':'s-review'}">${r.status}</span></td></tr>`).join("")}
+      </tbody></table>
+      <p class="hint">Ready-for-pickup rewards appear here with a pickup location.</p>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="row-between"><h3>Recent submissions</h3><button class="btn btn-ghost btn-sm" onclick="go('history')">View all</button></div>
+    ${subTable(submissions.filter(s=>s.dealer===dealer.name).slice(0,4), false)}
+  </div>`;
+}
+
+function statCard(label,val,sub,forest){
+  return `<div class="card"><div class="label">${label}</div>
+    <div class="stat ${forest?'forest':''}">${val.toLocaleString?val.toLocaleString():val}</div>
+    <div class="kpi-mini">${sub}</div></div>`;
+}
+
+function screenSubmit(){
+  markGuide("submit");
+  return `<div class="row-between"><div><div class="h1">Submit a verified sale</div>
+      <p class="lede">Proof is required for every submission.</p></div>${B.demo}</div>
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="grid cols-2">
+          <div class="field"><label>Store <span class="required">*</span></label>
+            <select><option>Sample Cannabis Co — Strip</option><option>Sample Cannabis Co — Henderson</option><option>Downtown Dispensary</option></select></div>
+          <div class="field"><label>Region</label><input value="Las Vegas" readonly /></div>
+          <div class="field"><label>Sale date <span class="required">*</span></label><input type="date" value="2026-07-21" /></div>
+          <div class="field"><label>Approx. sale time</label><input type="time" value="19:05" /></div>
+          <div class="field"><label>Brand <span class="required">*</span></label><select><option>The Grower Circle</option></select></div>
+          <div class="field"><label>Product <span class="required">*</span></label>
+            <select><option>Signature Flower 3.5g</option><option>Live Resin Cart 1g</option><option>Infused Preroll 1g</option><option>Flight Bites Gummies</option></select></div>
+          <div class="field"><label>Quantity <span class="required">*</span></label><input type="number" id="f_qty" value="5" min="1" /></div>
+          <div class="field"><label>Receipt number</label><input value="R-88301" /></div>
+        </div>
+        <div class="field"><label>Proof type <span class="required">*</span></label>
+          <select id="f_proof" onchange="proofChange()">
+            <option value="receipt">Customer receipt</option>
+            <option value="receipt">Reprinted receipt</option>
+            <option value="ba">Brand Ambassador verification</option>
+            <option value="receipt">Store-approved shift summary</option>
+            <option value="receipt">Alternate approved proof</option>
+          </select></div>
+        <div id="proofArea"></div>
+        <div class="field"><label>Notes</label><textarea rows="2" placeholder="Optional context for the reviewer"></textarea></div>
+        <button class="btn btn-primary" style="width:100%" onclick="submitSale()">Submit for review</button>
+      </div>
+      <div class="card">
+        <h3>How this works</h3>
+        <div class="callout">XP is awarded <strong>only after an admin approves</strong> your sale — not on submit.
+          At ${XP_PER_UNIT} XP per unit, a quantity of 5 = ${5*XP_PER_UNIT} XP once approved.</div>
+        <p class="hint" style="margin-top:12px">Duplicate checks run automatically. If your submission looks like a
+          repeat (same receipt / store / date / time / product, or a reused image), it's placed <em>on hold</em>
+          for a human to review — never auto-rejected.</p>
+        <p class="hint">Brand Ambassador verification is allowed without a receipt image, but requires a BA name and is
+          always routed to Under Review for manual confirmation.</p>
+      </div>
+    </div>`;
+}
+function proofChange(){
+  const v=$("f_proof").value;
+  $("proofArea").innerHTML = v==="ba"
+    ? `<div class="grid cols-2">
+        <div class="field"><label>BA name <span class="required">*</span></label><input value="Jordan (Lead BA)" /></div>
+        <div class="field"><label>Approx. activation time <span class="required">*</span></label><input type="time" value="15:30" /></div>
+       </div>
+       <div class="callout warn">BA verification will be <strong>flagged &amp; routed to Under Review</strong>. No XP until an admin confirms. Image optional.</div>`
+    : `<div class="field"><label>Receipt / proof upload <span class="required">*</span></label>
+        <div class="drop" onclick="toast('Demo Mode — file picker disabled')">📎 Tap to upload a photo or document<br>
+        <span class="kpi-mini">Image required for this proof type · stored securely (private bucket)</span></div></div>`;
+}
+function submitSale(){
+  const qty=parseInt(($("f_qty")||{}).value||"5",10);
+  const isBA=$("f_proof").value==="ba";
+  const id="S-"+(1053+Math.floor(Math.random()*40));
+  submissions.unshift({id,dealer:dealer.name,store:"Sample Cannabis Co — Strip",brand:"The Grower Circle",
+    product:"Signature Flower 3.5g",qty,date:"2026-07-21",time:"19:05",receipt:"R-88301",
+    proof:isBA?"BA verification":"Customer receipt",status:isBA?"under_review":"submitted",
+    flags:isBA?["BA verification — manual confirmation required"]:[]});
+  state.lastSubmitId=id;
+  render("confirm");
+}
+
+function screenConfirm(){
+  const s=submissions.find(x=>x.id===state.lastSubmitId)||submissions[0];
+  return `<div class="card" style="max-width:560px;margin:0 auto;text-align:center">
+    <div style="font-size:42px">✅</div>
+    <div class="h1">Submission received</div>
+    <p class="lede">Reference <strong>${s.id}</strong> · submitted ${s.date} ${s.time}</p>
+    <div class="callout">Status: ${statusPill(s.status)} &nbsp; ${s.status==='under_review'
+      ? 'A Retail Program Admin will manually confirm this BA-verified sale.'
+      : 'A Retail Program Admin will review your proof and approve or request more info.'}</div>
+    <p class="hint" style="margin-top:12px">You'll earn <strong>${s.qty*XP_PER_UNIT} XP</strong> once approved.</p>
+    <div style="margin-top:16px;display:flex;gap:8px;justify-content:center">
+      <button class="btn btn-ghost" onclick="go('history')">View history</button>
+      <button class="btn btn-primary" onclick="go('dealerDash')">Back to dashboard</button>
+    </div>
+  </div>`;
+}
+
+function screenHistory(){
+  return `<div class="row-between"><div class="h1">Submission history</div>${B.demo}</div>
+    <div class="card">${subTable(submissions.filter(s=>s.dealer===dealer.name), false)}</div>`;
+}
+
+function screenRewards(){
+  const tier=currentTier(state.monthlyUnits), next=nextTier(state.monthlyUnits);
+  const pct=next?Math.min(100,Math.round(state.monthlyUnits/next.min*100)):100;
+  return `<div class="row-between"><div class="h1">Rewards</div>${B.demo}</div>
+    <div class="grid cols-2">
+      <div class="card"><h3>This month</h3>
+        <p class="sub">${state.monthlyUnits} verified sales · current reward: <strong>${tier?tier.reward:'—'}</strong></p>
+        <div class="progress"><span style="width:${pct}%"></span></div>
+        <p class="hint">${next?`${next.min-state.monthlyUnits} more to <strong>${next.reward}</strong>`:'Top tier reached'}</p>
+        <table style="margin-top:12px"><thead><tr><th>Tier</th><th>Reward</th><th>Status</th></tr></thead><tbody>
+          ${TIERS.map(t=>`<tr><td>${t.min}</td><td>${t.reward}</td>
+            <td>${state.monthlyUnits>=t.min?'<span class="status s-approved">Earned</span>':'<span class="kpi-mini">—</span>'}</td></tr>`).join("")}
+        </tbody></table>
+      </div>
+      <div class="card"><h3>Pickup status</h3>
+        <table><thead><tr><th>Month / Reward</th><th>Status</th><th>Picked up</th></tr></thead><tbody>
+          ${rewards.map(r=>`<tr><td><strong>${r.tier}</strong><br><span class="kpi-mini">${r.month}</span></td>
+            <td><span class="status ${r.status==='Picked Up'?'s-approved':'s-review'}">${r.status}</span></td>
+            <td class="kpi-mini">${r.date}</td></tr>`).join("")}
+        </tbody></table>
+        <p class="hint" style="margin-top:10px">Rewards are physical products picked up locally (Las Vegas). No shipping in Version 1.</p>
+      </div>
+    </div>`;
+}
+
+function subTable(rows, admin){
+  if(!rows.length) return `<p class="hint">No submissions yet.</p>`;
+  return `<table><thead><tr><th>Ref</th>${admin?'<th>Dealer</th>':''}<th>Product</th><th>Qty</th>
+    <th>Date / time</th><th>Proof</th><th>Status</th>${admin?'<th></th>':''}</tr></thead><tbody>
+    ${rows.map(s=>`<tr>
+      <td><strong>${s.id}</strong></td>
+      ${admin?`<td>${s.dealer}</td>`:''}
+      <td>${s.product}<br><span class="kpi-mini">${s.store}</span></td>
+      <td>${s.qty}</td>
+      <td class="kpi-mini">${s.date}<br>${s.time}</td>
+      <td class="kpi-mini">${s.proof}</td>
+      <td>${statusPill(s.status)}${s.flags.length?'<br><span class="kpi-mini" style="color:var(--danger)">⚑ '+s.flags.length+' flag(s)</span>':''}</td>
+      ${admin?`<td><button class="btn btn-ghost btn-sm" onclick="openReview('${s.id}')">Review</button></td>`:''}
+    </tr>`).join("")}
+  </tbody></table>`;
+}
+
+// ---- Admin ----
+function screenAdminDash(){
+  markGuide("adminLogin");
+  const pending=submissions.filter(s=>['submitted','under_review'].includes(s.status)).length;
+  const flagged=submissions.filter(s=>s.status==='flagged').length;
+  const approvedUnits=submissions.filter(s=>s.status==='approved').reduce((a,b)=>a+b.qty,0);
+  return `<div class="row-between"><div><div class="h1">Admin dashboard</div>
+      <p class="lede">Las Vegas pilot · July 2026</p></div>${B.demo}</div>
+    <div class="grid cols-4">
+      ${statCard("Active dealers", 18, "invited: 6 · suspended: 1")}
+      ${statCard("Pending submissions", pending, "awaiting review")}
+      ${statCard("Flagged submissions", flagged, "need manual review", false)}
+      ${statCard("Reward liability", "$1,240", "earned, not picked up")}
+    </div>
+    <div class="grid cols-3" style="margin-top:16px">
+      ${miniList("Sales by store",[["Sample Cannabis Co — Strip","132"],["Downtown Dispensary","74"],["Henderson","41"]])}
+      ${miniList("Sales by brand",[["The Grower Circle","247"]])}
+      ${miniList("Sales by product",[["Signature Flower 3.5g","96"],["Live Resin Cart 1g","81"],["Infused Preroll 1g","70"]])}
+    </div>
+    <div class="grid cols-2" style="margin-top:16px">
+      ${miniList("Top Certified Dealers",[["Jordan Rivera","214 lifetime"],["Marcus Lee","188"],["Priya Shah","156"]])}
+      <div class="card"><div class="row-between"><h3>Rewards ready for pickup</h3>${B.demo}</div>
+        <table><tbody><tr><td>Premium eighth (25) — Jordan R.</td><td style="text-align:right"><span class="status s-review">Prepared</span></td></tr>
+        <tr><td>5 prerolls (10) — Marcus L.</td><td style="text-align:right"><span class="status s-approved">Ready for Pickup</span></td></tr></tbody></table>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px"><div class="row-between"><h3>Approval queue</h3>
+      <button class="btn btn-primary btn-sm" onclick="go('queue')">Open queue</button></div>
+      ${subTable(submissions.filter(s=>['submitted','under_review','flagged'].includes(s.status)), true)}
+    </div>`;
+}
+function miniList(title,rows){
+  return `<div class="card"><h3>${title}</h3><table><tbody>
+    ${rows.map(r=>`<tr><td>${r[0]}</td><td style="text-align:right"><strong>${r[1]}</strong></td></tr>`).join("")}
+  </tbody></table></div>`;
+}
+
+function screenQueue(){
+  markGuide("queue");
+  const rows=submissions.filter(s=>['submitted','under_review','flagged','more_info'].includes(s.status));
+  return `<div class="row-between"><div class="h1">Sales review queue</div>${B.demo}</div>
+    <div class="card">${subTable(rows,true)}</div>
+    <div id="reviewPanel"></div>`;
+}
+function openReview(id){
+  const s=submissions.find(x=>x.id===id); if(!s)return;
+  if(s.flags.length) markGuide("dup");
+  const xp=s.qty*XP_PER_UNIT;
+  const flagsHtml = s.flags.length
+    ? `<div class="callout danger"><strong>⚑ Possible duplicate / needs review</strong>
+        <ul style="margin:8px 0 0;padding-left:18px">${s.flags.map(f=>`<li>${f}</li>`).join("")}</ul>
+        <p class="hint" style="margin-top:8px">Shown to admins only — the system does not accuse the dealer or auto-reject.</p></div>`
+    : `<div class="callout">No duplicate signals detected.</div>`;
+  $("reviewPanel").innerHTML=`<div class="card" style="margin-top:16px">
+    <div class="row-between"><h3>Review ${s.id}</h3>${statusPill(s.status)}</div>
+    <div class="grid cols-2">
+      <div>
+        <table><tbody>
+          <tr><th>Dealer</th><td>${s.dealer}</td></tr>
+          <tr><th>Store</th><td>${s.store}</td></tr>
+          <tr><th>Product</th><td>${s.brand} · ${s.product}</td></tr>
+          <tr><th>Quantity</th><td>${s.qty} → <strong>${xp} XP</strong> on approval</td></tr>
+          <tr><th>Date / time</th><td>${s.date} ${s.time}</td></tr>
+          <tr><th>Receipt</th><td>${s.receipt}</td></tr>
+          <tr><th>Proof</th><td>${s.proof}</td></tr>
+        </tbody></table>
+      </div>
+      <div>
+        <div class="drop" style="height:150px;display:flex;align-items:center;justify-content:center"
+          onclick="toast('Demo Mode — proof preview')">🧾 Proof image preview<br><span class="kpi-mini">(private storage, signed URL)</span></div>
+        ${flagsHtml}
+      </div>
+    </div>
+    <div class="field" style="margin-top:12px"><label>Internal note (audit-logged)</label><input placeholder="Optional note for the record" /></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="approve('${s.id}')">Approve</button>
+      <button class="btn btn-warn" onclick="setStatus('${s.id}','more_info','More information requested')">Request more info</button>
+      <button class="btn btn-danger" onclick="setStatus('${s.id}','rejected','Rejected')">Reject</button>
+      ${s.flags.length?`<button class="btn btn-ghost" onclick="clearFlags('${s.id}')">Clear flags</button>`:''}
+    </div>
+  </div>`;
+  $("reviewPanel").scrollIntoView({behavior:"smooth"});
+}
+function setStatus(id,st,label){const s=submissions.find(x=>x.id===id);s.status=st;toast(`${id}: ${label} (audit-logged)`);go('queue')}
+function clearFlags(id){const s=submissions.find(x=>x.id===id);s.flags=[];toast(`${id}: flags cleared (audit-logged)`);openReview(id)}
+function approve(id){
+  const s=submissions.find(x=>x.id===id); const xp=s.qty*XP_PER_UNIT;
+  s.status="approved";
+  if(s.dealer===dealer.name){ state.monthlyUnits+=s.qty; state.lifetimeUnits+=s.qty; }
+  markGuide("approve"); markGuide("reward");
+  toast(`${id} approved · +${xp} XP awarded · reward tier recalculated`);
+  render("approved"); state.lastApproved={id,xp,qty:s.qty};
+}
+function screenApproved(){
+  const a=state.lastApproved||{id:"S-1050",xp:50,qty:5};
+  const tier=currentTier(state.monthlyUnits), next=nextTier(state.monthlyUnits);
+  const pct=next?Math.min(100,Math.round(state.monthlyUnits/next.min*100)):100;
+  return `<div class="card" style="max-width:640px;margin:0 auto">
+    <div style="text-align:center"><div style="font-size:40px">🌿</div>
+      <div class="h1">Sale ${a.id} approved</div>
+      <p class="lede">+${a.xp} XP awarded · totals and reward tier updated in real time</p></div>
+    <div class="grid cols-3">
+      ${statCard("Monthly units", state.monthlyUnits, "+"+a.qty)}
+      ${statCard("Monthly XP", state.monthlyUnits*XP_PER_UNIT, "+"+a.xp, true)}
+      ${statCard("Lifetime XP", state.lifetimeUnits*XP_PER_UNIT, "never resets", true)}
+    </div>
+    <div class="card" style="margin-top:8px"><div class="row-between"><h3>Dealer reward progress</h3>${B.demo}</div>
+      <p class="sub">Current: <strong>${tier?tier.reward:'—'}</strong></p>
+      <div class="progress"><span style="width:${pct}%"></span></div>
+      <p class="hint">${next?`${next.min-state.monthlyUnits} more to ${next.reward}`:'Top tier reached'}</p>
+    </div>
+    <div class="callout" style="margin-top:12px">Every step here is <strong>audit-logged</strong>: who approved, when, XP awarded,
+      and any note. Approved XP can only be changed later through a controlled admin reversal (reason required, history preserved).</div>
+    <div style="text-align:center;margin-top:14px">
+      <button class="btn btn-ghost" onclick="go('fulfill')">Reward fulfillment</button>
+      <button class="btn btn-primary" onclick="go('queue')">Back to queue</button></div>
+  </div>`;
+}
+
+function screenFulfill(){
+  markGuide("fulfill");
+  const all=[
+    {dealer:"Jordan Rivera",month:"July 2026",tier:"Premium eighth (25)",status:"Prepared",by:"—",date:"—"},
+    {dealer:"Marcus Lee",month:"July 2026",tier:"5 prerolls (10)",status:"Ready for Pickup",by:"A. Nguyen",date:"—"},
+    {dealer:"Priya Shah",month:"June 2026",tier:"5 prerolls (10)",status:"Picked Up",by:"A. Nguyen",date:"2026-07-02"},
+    {dealer:"Sam Ortiz",month:"June 2026",tier:"Premium eighth (25)",status:"Flagged for Review",by:"—",date:"—"},
+  ];
+  const st=(s)=>({"Prepared":"s-review","Ready for Pickup":"s-info","Picked Up":"s-approved","Flagged for Review":"s-flagged","Earned":"s-submitted","Expired":"s-rejected"}[s]||"s-submitted");
+  return `<div class="row-between"><div class="h1">Reward fulfillment</div>${B.demo}</div>
+    <div class="card"><table><thead><tr><th>Dealer</th><th>Month</th><th>Reward tier</th><th>Status</th><th>Fulfilled by</th><th>Pickup date</th></tr></thead><tbody>
+      ${all.map(r=>`<tr><td>${r.dealer}</td><td class="kpi-mini">${r.month}</td><td>${r.tier}</td>
+        <td><span class="status ${st(r.status)}">${r.status}</span></td><td class="kpi-mini">${r.by}</td><td class="kpi-mini">${r.date}</td></tr>`).join("")}
+    </tbody></table>
+    <p class="hint" style="margin-top:10px">Statuses: Earned → Prepared → Ready for Pickup → Picked Up → Expired. A reward already
+      <strong>Picked Up</strong> is never auto-clawed back after an XP reversal — it's <strong>Flagged for Review</strong> instead.</p>
+    </div>`;
+}
+
+// ---- Shared: pilot + roadmap ----
+function screenPilot(){
+  return `<div class="row-between"><div class="h1">Las Vegas pilot overview</div>${B.demo}</div>
+    <div class="grid cols-3">
+      ${statCard("Region","Las Vegas","only active region in V1")}
+      ${statCard("Stores","3 sample","multi-location dispensary groups")}
+      ${statCard("XP per unit",XP_PER_UNIT,"flat, admin-configurable")}
+    </div>
+    <div class="card" style="margin-top:16px"><h3>What the pilot proves</h3>
+      <ul style="font-size:14px;line-height:1.7">
+        <li>Certified Dealers can log verified sales from the floor on their phone.</li>
+        <li>Every submission requires proof and passes automatic duplicate checks.</li>
+        <li>Admins approve sales; XP and capped monthly product rewards update instantly.</li>
+        <li>Reward fulfillment (local pickup) and a full audit trail are tracked end to end.</li>
+      </ul>
+      <div class="callout">Everything is region-scoped in the database, so opening a new market is a data change, not a rebuild.</div>
+    </div>`;
+}
+function screenRoadmap(){
+  markGuide("roadmap");
+  return `<div class="row-between"><div class="h1">Expansion roadmap</div>${B.demo}</div>
+    <div class="card">
+      <div class="roadmap-step"><div class="dot">1</div><div>
+        <strong>Las Vegas — Version 1 (now)</strong> &nbsp;${B.working} / ${B.demo}
+        <p class="hint">Certified Dealer program: sales, proof, duplicate review, approval, XP, monthly rewards, fulfillment, audit logs.</p></div></div>
+      <div class="roadmap-step"><div class="dot soft">2</div><div>
+        <strong>Northern Nevada — expansion</strong> &nbsp;${B.planned}
+        <p class="hint">Add a region row, stores, and dealers. No schema rewrite — the system is region-ready today.</p></div></div>
+      <div class="roadmap-step"><div class="dot soft">3</div><div>
+        <strong>New Mexico — expansion</strong> &nbsp;${B.planned}
+        <p class="hint">Same playbook as Northern Nevada.</p></div></div>
+      <div class="roadmap-step"><div class="dot plan">4</div><div>
+        <strong>Version 2 — Brand Ambassadors, Discord community, education, badges, events</strong> &nbsp;${B.planned}
+        <p class="hint">BA verification already stores a temporary BA name designed to later link to real BA + event records.</p></div></div>
+    </div>`;
+}
+
+// ============================================================
+// Router
+// ============================================================
+function go(k){render(k)}
+function login(role){state.role=role;markGuide("login");render(role==="dealer"?"dealerDash":"adminDash")}
+function logout(){state.role=null;render("login")}
+
+function render(view){
+  const app=$("app");
+  if(!state.role){app.innerHTML=chromeless(screenLogin());renderGuide();return}
+  const map={
+    dealerDash:screenDealerDash, submit:screenSubmit, confirm:screenConfirm, history:screenHistory,
+    rewards:screenRewards, adminDash:screenAdminDash, queue:screenQueue, approved:screenApproved,
+    fulfill:screenFulfill, pilot:screenPilot, roadmap:screenRoadmap
+  };
+  const activeTab = {confirm:"submit",approved:"queue"}[view] || view;
+  const body=(map[view]||map[state.role==="dealer"?"dealerDash":"adminDash"])();
+  app.innerHTML = chrome(activeTab) + `<main><div class="shell">${body}
+    <div class="footer">Demo Mode · The Grower Circle Retail Portal · sample data only ·
+      <span class="legend">${B.working} ${B.partial} ${B.demo} ${B.planned}</span></div>
+  </div></main>`;
+  if(view==="submit")proofChange();
+  renderGuide();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function chromeless(inner){return `<main>${inner}</main>`}
+
+render("login");
+</script>
+</body>
+</html>
