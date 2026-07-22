@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Grower Circle — Retail Portal · Executive Overview</title>
+<style>
+  :root{
+    --brand-black:#050505;--brand-charcoal:#121212;--brand-panel:#191919;
+    --brand-white:#FFFFFF;--brand-off-white:#F4F3EF;
+    --brand-green:#355E2E;--brand-green-dark:#1E3A22;--brand-green-muted:#748A6A;
+    --brand-border-dark:#2C2C2C;--brand-border-light:#D8D8D3;--brand-text-muted:#A9A9A3;
+    --text-on-light:#141414;--text-muted-light:#5B5B55;
+    --shadow:0 1px 2px rgba(5,5,5,.04), 0 8px 24px rgba(5,5,5,.06);--radius:12px;
+    --status-approved:var(--brand-green);--status-pending:#8A7B5C;--status-flagged:#7A2E2E;
+    --status-rejected:#5E1F1F;--status-draft:#6B6B66;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;font-family:var(--sans);color:var(--text-on-light);background:var(--brand-off-white);
+    line-height:1.6;letter-spacing:-.005em}
+  .wrap{max-width:960px;margin:0 auto;padding:0 24px}
+  .accent{display:block;width:34px;height:3px;background:var(--brand-green);border-radius:2px;margin-bottom:14px}
+  .icon{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .icon-tile{width:38px;height:38px;border:1px solid var(--brand-border-light);border-radius:10px;
+    display:inline-flex;align-items:center;justify-content:center;color:var(--brand-green);margin-bottom:12px}
+  .strip{background:var(--brand-black);color:var(--brand-off-white);font-size:11px;font-weight:600;
+    text-align:center;padding:8px 16px;letter-spacing:.14em;text-transform:uppercase;
+    border-bottom:1px solid var(--brand-green)}
+  .hero{background:var(--brand-black);color:var(--brand-white);border-bottom:1px solid var(--brand-green)}
+  .hero .wrap{padding:40px 24px 46px}
+  .brand{display:flex;align-items:center;gap:14px;margin-bottom:30px}
+  .brand-mark{width:52px;height:52px;flex:0 0 52px;display:inline-flex}
+  .brand-mark img{width:100%;height:100%;object-fit:contain;border-radius:50%}
+  .brand .name{font-weight:700;font-size:17px;color:#fff;letter-spacing:.01em}
+  .brand .motto{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--brand-green-muted);margin-top:3px}
+  .eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--brand-green-muted);margin-bottom:10px}
+  h1{font-size:clamp(26px,4.4vw,36px);line-height:1.12;letter-spacing:-.02em;margin:0 0 14px;color:#fff;font-weight:800}
+  .hero p{font-size:16px;color:#D6D6D1;max-width:640px;margin:0}
+  .tag{display:inline-flex;align-items:center;gap:8px;margin-top:22px;background:var(--brand-green-dark);
+    border:1px solid var(--brand-green);color:#EAF0E7;font-size:12px;padding:7px 14px;border-radius:999px;
+    letter-spacing:.04em;font-weight:600}
+  section{padding:38px 0}
+  h2{font-size:22px;margin:0 0 6px;letter-spacing:-.02em;font-weight:700}
+  .sub{color:var(--text-muted-light);margin:0 0 22px;font-size:15px}
+  .grid{display:grid;gap:18px}
+  .cols-2{grid-template-columns:1fr 1fr}
+  .cols-3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:780px){.cols-2,.cols-3{grid-template-columns:1fr}}
+  .card{background:var(--brand-white);border:1px solid var(--brand-border-light);border-radius:var(--radius);
+    padding:22px;box-shadow:var(--shadow);position:relative}
+  .card.accented{border-top:3px solid var(--brand-green)}
+  .card h3{margin:0 0 6px;font-size:15px;font-weight:700}
+  .card p{margin:0;color:#333;font-size:14px}
+  .num{font-size:30px;font-weight:800;color:var(--brand-green);letter-spacing:-.02em;line-height:1}
+  ul.clean{margin:10px 0 0;padding-left:18px;font-size:14px;color:#333}
+  ul.clean li{margin-bottom:7px}
+  ul.clean li::marker{color:var(--brand-green)}
+  .flow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:14px}
+  .chip{display:inline-flex;align-items:center;gap:8px;background:var(--brand-white);
+    border:1px solid var(--brand-border-light);border-radius:999px;padding:9px 15px;font-weight:600;box-shadow:var(--shadow)}
+  .chip .icon{width:16px;height:16px;color:var(--brand-green)}
+  .arrow{color:var(--brand-green-muted);font-weight:700}
+  .dark{background:var(--brand-charcoal);color:var(--brand-off-white);border-top:1px solid var(--brand-border-dark);
+    border-bottom:1px solid var(--brand-border-dark)}
+  .dark h2{color:#fff}
+  .dark .sub{color:var(--brand-text-muted)}
+  .dark ul.clean{color:#D6D6D1}
+  .approve{background:var(--brand-charcoal);color:#fff;border:1px solid var(--brand-border-dark);border-radius:16px;padding:26px}
+  .approve h2{color:#fff}
+  .approve .sub{color:var(--brand-text-muted)}
+  .approve table{width:100%;border-collapse:collapse;margin-top:12px}
+  .approve td{padding:13px 6px;border-bottom:1px solid var(--brand-border-dark);font-size:15px;vertical-align:middle}
+  .approve tr:last-child td{border-bottom:none}
+  .approve td:first-child{color:#CFCFC9;width:54%}
+  .approve .ph{color:var(--brand-green-muted);font-weight:700;font-family:var(--sans)}
+  .foot{color:var(--text-muted-light);font-size:12px;text-align:center;padding:30px 24px}
+  .divider{height:1px;background:var(--brand-border-light);border:none;margin:0}
+</style>
+</head>
+<body>
+<div class="strip">Executive Overview · For the meeting with Mike &amp; Phoenix</div>
+
+<header class="hero"><div class="wrap">
+  <div class="brand">
+    <span class="brand-mark" id="brandMark">
+      <svg viewBox="0 0 52 52" aria-label="The Grower Circle">
+        <circle cx="26" cy="26" r="25" fill="none" stroke="#fff" stroke-width="1.5"/>
+        <circle cx="26" cy="26" r="20.5" fill="none" stroke="var(--brand-green-muted)" stroke-width="1"/>
+        <path d="M26 13.5c3.4 4.4 3.4 7.7 1.7 11.5 2.7-1.8 4.9-2.9 7.2-2.9-1.2 4.5-4.5 6.7-7.9 7.2V39h-2v-9.7c-3.4-.5-6.7-2.7-7.9-7.2 2.3 0 4.5 1.1 7.2 2.9C20.6 21.2 20.6 17.9 24 13.5c1.1 1.4 2 3 2 5 0-2 .9-3.6 2-5z" fill="#fff"/>
+      </svg>
+    </span>
+    <span>
+      <span class="name">The Grower Circle</span>
+      <span class="motto">For Connoisseurs, By Connoisseurs</span>
+    </span>
+  </div>
+  <div class="eyebrow">Retail Portal · Executive Overview</div>
+  <h1>Turn our best budtenders into a measurable sales engine</h1>
+  <p>A mobile portal where Certified Dealers log verified sales of The Grower Circle, earn capped monthly
+     product rewards, and give us clean, trustworthy sell-through data — starting with a Las Vegas pilot.</p>
+  <span class="tag">
+    <svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px;color:var(--brand-green-muted)"><path d="M20 6 9 17l-5-5"/></svg>
+    Version 1 · Certified Dealer Program · Las Vegas
+  </span>
+</div></header>
+
+<div class="wrap">
+
+<section>
+  <span class="accent"></span>
+  <h2>What it is</h2>
+  <p class="sub">One simple loop that rewards the people who actually move our product.</p>
+  <div class="flow">
+    <span class="chip"><svg class="icon" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M6 21V9l6-4 6 4v12"/><path d="M10 21v-6h4v6"/></svg>Budtender sells TGC</span>
+    <span class="arrow">→</span>
+    <span class="chip"><svg class="icon" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Logs the sale + proof</span>
+    <span class="arrow">→</span>
+    <span class="chip"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Admin approves</span>
+    <span class="arrow">→</span>
+    <span class="chip"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg>Earns XP</span>
+    <span class="arrow">→</span>
+    <span class="chip"><svg class="icon" viewBox="0 0 24 24"><path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7S9 3 6.5 3 4 7 4 7"/><path d="M12 7s3-4 5.5-4S20 7 20 7"/></svg>Unlocks monthly reward</span>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<section>
+  <span class="accent"></span>
+  <h2>Why Certified Dealers worked before</h2>
+  <p class="sub">We're formalizing something that already drove reorders.</p>
+  <div class="grid cols-3">
+    <div class="card accented">
+      <span class="icon-tile"><svg class="icon" viewBox="0 0 24 24"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg></span>
+      <h3>Budtenders decide the sale</h3><p>Shoppers ask "what's good?" The budtender's recommendation is the point of sale. Rewarding them moves volume.</p></div>
+    <div class="card accented">
+      <span class="icon-tile"><svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      <h3>Relationships → reorders</h3><p>Engaged budtenders keep TGC top-of-mind and stocked, which pulls the store into repeat orders.</p></div>
+    <div class="card accented">
+      <span class="icon-tile"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg></span>
+      <h3>What was missing</h3><p>Proof and structure. Version 1 adds verified tracking so the program is fair, measurable, and hard to game.</p></div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<section>
+  <span class="accent"></span>
+  <h2>How Version 1 tracks verified sales</h2>
+  <div class="grid cols-2">
+    <div class="card">
+      <span class="icon-tile"><svg class="icon" viewBox="0 0 24 24"><path d="M4 2h12l4 4v16H4z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg></span>
+      <h3>Proof on every sale</h3><p>Each submission requires a receipt photo or approved proof. Nothing counts without evidence.</p></div>
+    <div class="card">
+      <span class="icon-tile"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+      <h3>Fraud &amp; duplicates reviewed, not accused</h3>
+      <p>The system quietly flags possible duplicates — same receipt, store, date, time, product, a reused photo, or the
+         same transaction claimed by two people — and <strong>holds them for a human</strong>. It never auto-rejects or accuses.</p></div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<section>
+  <span class="accent"></span>
+  <h2>How XP and rewards work</h2>
+  <p class="sub">Simple, capped, and fully in your control.</p>
+  <div class="grid cols-3">
+    <div class="card accented"><div class="num">10 XP</div>
+      <p style="margin-top:10px">per approved unit — one flat, admin-set number. XP is awarded <strong>only after approval</strong>.</p></div>
+    <div class="card"><h3>Monthly product tiers</h3>
+      <ul class="clean">
+        <li>10 sales → 5 prerolls</li>
+        <li>25 → Premium eighth</li>
+        <li>50 → Premium eighth + Flight Bites</li>
+        <li>75 → Choice reward</li>
+        <li>100 → Platinum Mystery Box + merch entry</li>
+        <li>150+ → Elite Mystery Box + VIP entry</li>
+      </ul></div>
+    <div class="card"><h3>Capped by design</h3><p>Monthly sales reset each month; a dealer earns the <strong>highest tier they reach</strong> — so your reward
+       budget is predictable. Lifetime totals never reset, for long-term recognition.</p></div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<section>
+  <span class="accent"></span>
+  <h2>How fulfillment is tracked</h2>
+  <p class="sub">Physical rewards, picked up locally in Las Vegas — no shipping in Version 1.</p>
+  <div class="flow">
+    <span class="chip"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg>Earned</span>
+    <span class="arrow">→</span>
+    <span class="chip"><svg class="icon" viewBox="0 0 24 24"><path d="M20 7 12 3 4 7v10l8 4 8-4z"/><path d="M4 7l8 4 8-4"/><path d="M12 21V11"/></svg>Prepared</span>
+    <span class="arrow">→</span>
+    <span class="chip"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Ready for pickup</span>
+    <span class="arrow">→</span>
+    <span class="chip"><svg class="icon" viewBox="0 0 24 24" style="color:var(--brand-green)"><path d="M20 6 9 17l-5-5"/></svg>Picked up</span>
+  </div>
+  <p style="font-size:14px;color:#333;margin-top:16px">Every reward records who fulfilled it and when. A "reward liability"
+     number shows what's earned but not yet handed out, so nothing slips.</p>
+</section>
+
+<hr class="divider" />
+
+<section>
+  <span class="accent"></span>
+  <h2>Why this helps sell-through and reorders</h2>
+  <div class="grid cols-3">
+    <div class="card"><h3>More recommendations</h3><p>Budtenders have a direct, tangible reason to put TGC in the bag.</p></div>
+    <div class="card"><h3>Clean data</h3><p>Verified, de-duplicated sales by store, brand, and product — so we know exactly what's moving where.</p></div>
+    <div class="card"><h3>Smarter reorders</h3><p>That data tells reps which stores to revisit and which products to push, tightening the reorder cycle.</p></div>
+  </div>
+</section>
+
+</div>
+
+<section class="dark"><div class="wrap"><div class="grid cols-2" style="padding:34px 0">
+  <div><span class="accent"></span><h2>The Las Vegas pilot</h2>
+    <ul class="clean">
+      <li>One region live: Las Vegas</li>
+      <li>Invite-only Certified Dealers</li>
+      <li>Verified sales, proof, approval, XP, monthly rewards, fulfillment, audit trail</li>
+      <li>Runs on secure, low-cost infrastructure</li>
+    </ul></div>
+  <div><span class="accent"></span><h2>What expands later</h2>
+    <ul class="clean">
+      <li>Northern Nevada, then New Mexico — a data change, not a rebuild</li>
+      <li>Version 2: Brand Ambassador tools, Discord community, education, badges, events</li>
+      <li>Discord notifications &amp; leaderboards (optional, never required in V1)</li>
+    </ul></div>
+</div></div></section>
+
+<div class="wrap">
+
+<section>
+  <span class="accent"></span>
+  <h2>What Phoenix would help build and maintain</h2>
+  <div class="grid cols-2">
+    <div class="card"><h3>Build</h3><p>Finish wiring the Version 1 screens to the secure database, complete the admin tools, and prepare the pilot for launch.</p></div>
+    <div class="card"><h3>Maintain</h3><p>Support dealers and admins during the pilot, monitor for issues, and lead Version 2 (Brand Ambassadors + Discord).</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="approve">
+    <span class="accent"></span>
+    <h2>What we need approved</h2>
+    <p class="sub">Fill these in together in the meeting.</p>
+    <table>
+      <tr><td>Las Vegas pilot — go / no-go</td><td class="ph">[ approve ]</td></tr>
+      <tr><td>Number of initial Certified Dealers</td><td class="ph">[ # dealers ]</td></tr>
+      <tr><td>Monthly product reward budget</td><td class="ph">[ $ / month ]</td></tr>
+      <tr><td>Approved XP per unit</td><td class="ph">[ default 10 XP ]</td></tr>
+      <tr><td>Phoenix development hours</td><td class="ph">[ hrs to launch ]</td></tr>
+      <tr><td>Phoenix maintenance hours</td><td class="ph">[ hrs / month ]</td></tr>
+      <tr><td>Hosting budget</td><td class="ph">[ $ / month ]</td></tr>
+      <tr><td>Target launch date</td><td class="ph">[ date ]</td></tr>
+    </table>
+  </div>
+</section>
+
+</div>
+
+<div class="foot">The Grower Circle Retail Portal · Executive Overview · Version 1 (Certified Dealer Program) · Las Vegas Pilot</div>
+
+<script>
+  /* LOGO CONFIG — set BRAND_LOGO_SRC to the official logo path (e.g. "logo.png"); "" uses the placeholder mark. */
+  const BRAND_LOGO_SRC = "";
+  if (BRAND_LOGO_SRC) {
+    document.getElementById("brandMark").innerHTML =
+      '<img src="' + BRAND_LOGO_SRC + '" alt="The Grower Circle" />';
+  }
+</script>
+</body>
+</html>
