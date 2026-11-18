@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+:root{
+  --bg:#000;--panel:#111;--panel2:#1a1a1a;--line:#333;--ink:#fff;--soft:#d6d6d6;--muted:#9a9a9a;
+  --good:#2fbf71;--bad:#ff4d3d;--sans:Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:20px;line-height:1.35}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--ink)}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:2px solid var(--ink);display:flex;align-items:center;gap:18px;padding:10px 20px;flex-wrap:wrap}
+.top img{width:64px;height:64px}
+.brand .t{font-size:22px;font-weight:800;letter-spacing:3px}
+.brand .s{font-size:16px;color:var(--soft)}
+.mode{display:flex;border:2px solid var(--ink);border-radius:999px;overflow:hidden}
+.mode button{background:none;border:0;padding:10px 20px;font-weight:800;font-size:18px;letter-spacing:1px}
+.mode button[aria-pressed="true"]{background:var(--ink);color:#000}
+.clock{margin-left:auto;display:flex;align-items:center;gap:14px}
+.time{font-size:46px;font-weight:800;font-variant-numeric:tabular-nums;min-width:150px;text-align:right}
+.time.warn{color:#ffd23f}.time.over{color:var(--bad)}
+.total{font-size:15px;color:var(--soft);text-align:right}
+.btn{border:2px solid var(--ink);background:none;border-radius:12px;padding:12px 20px;font-weight:800}
+.btn.white{background:var(--ink);color:#000}
+.btn.small{padding:6px 12px;font-size:16px;border-radius:9px}
+.btn:disabled{opacity:.35;cursor:default}
+
+/* layout */
+.wrap{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 90px)}
+nav{border-right:1px solid var(--line);padding:14px 10px;display:flex;flex-direction:column;gap:4px}
+.step{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:10px;text-align:left;background:none;border:2px solid transparent;border-radius:12px;padding:9px 10px;font-size:18px}
+.step .no{width:34px;height:34px;border-radius:50%;border:2px solid var(--muted);display:grid;place-items:center;font-weight:800;font-size:16px;color:var(--muted)}
+.step .mm{color:var(--muted);font-size:15px}
+.step[aria-current="step"]{border-color:var(--ink)}
+.step[aria-current="step"] .no{background:var(--ink);border-color:var(--ink);color:#000}
+.step.done .no{background:#444;border-color:#444;color:var(--ink)}
+.step.done .n{color:var(--muted)}
+main{padding:22px 30px 120px;max-width:1300px}
+.kicker{font-size:16px;letter-spacing:3px;color:var(--soft);font-weight:700}
+h1{font-size:48px;margin:4px 0 14px;letter-spacing:1px}
+.how{display:grid;gap:10px;margin-bottom:22px}
+.how div{border-left:6px solid var(--ink);padding:6px 14px;background:var(--panel)}
+.how b{display:block;font-size:14px;letter-spacing:2px;color:var(--soft)}
+.how .say{font-size:24px;font-style:italic}
+.banner{border:3px solid var(--ink);border-radius:14px;padding:14px 18px;font-size:24px;font-weight:800;margin-bottom:18px;display:none}
+.banner.on{display:block}.banner.over{border-color:var(--bad);color:var(--bad)}
+.foot{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:2px solid var(--ink);display:flex;justify-content:space-between;padding:12px 20px;z-index:5}
+.foot .btn{font-size:22px;padding:14px 28px}
+
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:16px 18px}
+.card.off{border-color:var(--bad)}
+.card.none{opacity:.55;border-style:dashed}
+.card .who{font-size:26px;font-weight:800;margin-bottom:6px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.tag{display:inline-block;border:2px solid var(--ink);border-radius:8px;padding:2px 9px;font-size:15px;font-weight:800;letter-spacing:1px;white-space:nowrap}
+.tag.good{border-color:var(--good);color:var(--good)}.tag.bad{border-color:var(--bad);color:var(--bad)}
+.tag.fill-good{background:var(--good);border-color:var(--good);color:#000}.tag.fill-bad{background:var(--bad);border-color:var(--bad);color:#000}
+.tag.grey{border-color:var(--muted);color:var(--muted)}
+.muted{color:var(--muted)}.soft{color:var(--soft)}
+ol,ul{margin:6px 0;padding-left:26px}li{margin:4px 0}
+.big{font-size:26px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.pick{border:2px solid var(--ink);background:none;border-radius:12px;padding:10px 18px;font-weight:800;font-size:20px}
+.pick[aria-pressed="true"]{background:var(--ink);color:#000}
+.pick.yes[aria-pressed="true"]{background:var(--good);border-color:var(--good)}
+.pick.no[aria-pressed="true"]{background:var(--bad);border-color:var(--bad)}
+.empty{border:2px dashed var(--line);border-radius:16px;padding:26px;font-size:22px;color:var(--soft)}
+.section{font-size:18px;letter-spacing:3px;font-weight:800;margin:26px 0 10px;border-bottom:2px solid var(--ink);padding-bottom:6px}
+.issue{background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:12px}
+.issue.hot{border-color:var(--bad)}
+.issue.answered{opacity:.7}
+.issue .txt{font-size:24px;font-weight:700;margin:6px 0}
+.issue label{font-size:15px;letter-spacing:1px;color:var(--soft);display:block;margin:10px 0 4px}
+textarea,input[type=text],input[type=date],select{background:#000;border:2px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;font-size:19px}
+textarea:focus,input:focus,select:focus{outline:none;border-color:var(--ink)}
+.counts{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.count{border:2px solid var(--ink);border-radius:12px;padding:8px 16px;font-size:20px;font-weight:800}
+.count.bad{border-color:var(--bad);color:var(--bad)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px}
+.chip{border:2px solid var(--line);background:none;border-radius:999px;padding:8px 16px;font-weight:700;font-size:18px}
+.chip[aria-pressed="true"]{background:var(--ink);color:#000;border-color:var(--ink)}
+table.snap{width:100%;border-collapse:collapse;font-size:24px}
+table.snap td{border-bottom:1px solid var(--line);padding:14px 10px;vertical-align:top}
+table.snap td.v{font-weight:800;white-space:nowrap}
+.rate{display:flex;gap:6px;flex-wrap:wrap}
+.rate button{width:44px;height:44px;border:2px solid var(--line);background:none;border-radius:10px;font-weight:800}
+.rate button[aria-pressed="true"]{background:var(--ink);color:#000;border-color:var(--ink)}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:#000;padding:12px 20px;border-radius:12px;font-weight:800;opacity:0;transition:opacity .2s;z-index:9}
+.toast.on{opacity:1}
+.mini{font-variant-numeric:tabular-nums;font-weight:800}
+.recapbox{border:3px solid var(--good);border-radius:16px;padding:18px;font-size:22px}
+
+@media (max-width:900px){
+  html,body{font-size:18px}
+  .wrap{grid-template-columns:1fr}
+  nav{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:8px}
+  .step{grid-template-columns:30px auto;min-width:max-content}
+  .step .mm{display:none}
+  main{padding:16px 16px 120px}
+  h1{font-size:34px}
+  .time{font-size:34px;min-width:110px}
+  .top{padding:8px 16px;gap:10px}
+  .top img{width:44px;height:44px}
+  .clock{margin-left:0;width:100%;justify-content:space-between}
+  .foot .btn{font-size:18px;padding:12px 18px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <? if (logo) { ?><img src="data:image/png;base64,<?= logo ?>" alt="The Grower Circle"><? } ?>
+  <div class="brand"><div class="t">TGC TEAM MEETING</div><div class="s" id="mlabel">Loading…</div></div>
+  <div class="mode" role="group" aria-label="Which meeting">
+    <button id="m-mon" aria-pressed="false">MONDAY</button>
+    <button id="m-fri" aria-pressed="false">FRIDAY</button>
+  </div>
+  <div class="clock">
+    <div><div class="time" id="time">0:00</div><div class="total" id="total">Meeting 0:00 of 60:00</div></div>
+    <button class="btn white" id="startBtn">Start timer</button>
+  </div>
+</header>
+<div class="wrap">
+  <nav id="rail" aria-label="Steps"></nav>
+  <main>
+    <div class="banner" id="banner"></div>
+    <div id="stage"><div class="empty">Loading the board…</div></div>
+  </main>
+</div>
+<div class="foot">
+  <button class="btn" id="backBtn">← Back</button>
+  <button class="btn white" id="nextBtn">Next step →</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- the 9 steps ---------- */
+const STEPS = [
+  { n: 'Personal Update', m: 8, kind: 'personal',
+    what: 'Go around the room. About 1 minute each. Tap ✓ when the person is done.',
+    say: 'How are you doing, and is anything going on that could affect your week? "Pass" is OK.' },
+  { n: 'Clearing Round', m: 1, kind: 'clear',
+    what: 'Everyone shows a thumbs up or down. Tap what they show.',
+    say: 'Thumbs up or thumbs down: are you good with everyone here? Thumbs down means a 1-on-1 right after the meeting.' },
+  { n: 'Company Snapshot', m: 4, kind: 'snapshot',
+    what: 'Mike, Seattal or Jordan reads this screen. Everyone else just listens.',
+    say: 'Here is where the whole company stands. Save questions for Problem Solving.' },
+  { n: 'Weekly Goals', m: 5, kind: 'weekly',
+    what: { Monday: 'Each person reads their 3 goals. No explaining.', Friday: 'Each person says Hit or Missed for each goal. No explaining.' },
+    say: { Monday: 'Read your 3 goals for this week. Each one needs a number and a deadline.', Friday: 'Hit or Missed? Just the one word. Missed goals go on the Issues List.' } },
+  { n: 'Monthly Goals', m: 4, kind: 'monthly',
+    what: 'Each person says On Track or Off Track. Red = Off Track.',
+    say: 'On Track or Off Track? "Kind of" is not an answer. Off Track goes on the Issues List.' },
+  { n: 'Headlines', m: 3, kind: 'headlines',
+    what: 'Each person reads their one sentence of news. No discussion.',
+    say: 'One sentence each: news about a customer, a store or the team.' },
+  { n: 'To-Do Review', m: 4, kind: 'todos',
+    what: 'Each person reads their To-Dos from last meeting. Tap Done or Not Done.',
+    say: 'Done or Not Done? Not Done twice in a row goes on the Issues List.' },
+  { n: 'Problem Solving', m: 26, kind: 'issues',
+    what: { Monday: 'Biggest issues first, one at a time. 10 minutes max each. Mike makes the call.',
+      Friday: 'Start with blockers so nobody carries one into next week. 10 minutes max each. Mike makes the call.' },
+    say: 'What is the real problem? Everyone says their point once. Mike, what is the call? Who owns it, and by when?' },
+  { n: 'Wrap-Up', m: 5, kind: 'wrap',
+    what: 'Everyone reads their new To-Dos out loud. Then everyone rates the meeting 1 to 10. Then press Finish.',
+    say: 'Read your To-Dos: what and by when. Rate the meeting 1 to 10. Under 8? Say what would make it a 10.' }
+];
+const TOTAL_MIN = 60;
+
+const S = { data: null, mode: null, cur: 0, run: false, startedAt: 0, spent: 0, busy: 0, filter: 'All', clocks: {} };
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function day(iso) { if (!iso) return ''; const d = new Date(iso + 'T12:00:00'); return isNaN(d) ? iso : d.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' }); }
+function plusDays(n) { const d = new Date(); d.setDate(d.getDate() + n); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function mmss(s) { const neg = s < 0; s = Math.abs(Math.round(s)); return (neg ? '+' : '') + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+function pick(v) { return typeof v === 'string' ? v : v[S.mode]; }
+function D() { return S.data; }
+function key() { return D().meeting.key; }
+function st() { return D().state; }
+function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 2000); }
+function call(fn, args, ok) {
+  S.busy++;
+  google.script.run.withSuccessHandler(r => { S.busy--; ok && ok(r); })
+    .withFailureHandler(e => { S.busy--; toast('Did not save. Try again. (' + (e && e.message || e) + ')'); })[fn].apply(null, args);
+}
+function saveState(patch) {
+  const s = st();
+  Object.keys(patch).forEach(k => {
+    if (patch[k] && typeof patch[k] === 'object') s[k] = Object.assign(s[k] || {}, patch[k]); else s[k] = patch[k];
+  });
+  call('saveState', [key(), patch]);
+}
+function people() { return D().people; }
+function formPeople() { return D().people.filter(p => p.fillsForm); }
+function upd(name) { return D().updates.find(u => u.name === name); }
+function nameOptions(sel) { return '<option value="">Pick a name</option>' + people().map(p => `<option ${p.name === sel ? 'selected' : ''}>${esc(p.name)}</option>`).join(''); }
+
+/* ---------- load + auto refresh (every 45 seconds) ---------- */
+function load(first) {
+  google.script.run.withSuccessHandler(d => {
+    S.data = d;
+    if (first) {
+      S.mode = d.state.mode || d.meeting.type || 'Monday';
+      if (typeof d.state.cur === 'number') S.cur = Math.min(d.state.cur, STEPS.length - 1);
+    }
+    render();
+  }).withFailureHandler(e => {
+    $('stage').innerHTML = '<div class="empty">Could not load the board. Reload the page. (' + esc(e && e.message || e) + ')</div>';
+  }).getBoard();
+}
+setInterval(() => {
+  const a = document.activeElement;
+  if (S.busy || (a && /INPUT|TEXTAREA|SELECT/.test(a.tagName))) return;
+  load(false);
+}, 45000);
+
+/* ---------- header ---------- */
+function setMode(m) { S.mode = m; saveState({ mode: m }); render(); }
+$('m-mon').onclick = () => setMode('Monday');
+$('m-fri').onclick = () => setMode('Friday');
+
+/* ---------- timers ---------- */
+function stepLeft() { const el = S.spent + (S.run ? (Date.now() - S.startedAt) / 1000 : 0); return STEPS[S.cur].m * 60 - el; }
+function resetStepTimer() { S.spent = 0; S.startedAt = Date.now(); }
+$('startBtn').onclick = () => {
+  if (S.run) { S.spent += (Date.now() - S.startedAt) / 1000; S.run = false; }
+  else {
+    S.run = true; S.startedAt = Date.now();
+    if (D() && !st().meetingStart) saveState({ meetingStart: Date.now() });
+  }
+  tick();
+};
+function tick() {
+  if (!D()) return;
+  const left = stepLeft();
+  const t = $('time');
+  t.textContent = left >= 0 ? mmss(left) : mmss(left);
+  t.className = 'time' + (left < 0 ? ' over' : left <= 60 ? ' warn' : '');
+  $('startBtn').textContent = S.run ? 'Pause' : (S.spent ? 'Keep going' : 'Start timer');
+  const ms = st().meetingStart;
+  const tot = ms ? (Date.now() - ms) / 1000 : 0;
+  $('total').textContent = 'Meeting ' + mmss(tot) + ' of ' + TOTAL_MIN + ':00' + (tot > TOTAL_MIN * 60 ? ' · OVER' : '');
+  const b = $('banner');
+  if (S.run && left <= 0) { b.className = 'banner on over'; b.textContent = '⏰ Time is up. Wrap it up and press Next step.'; }
+  else if (S.run && left <= 60) { b.className = 'banner on'; b.textContent = '"One minute." Time is almost up on this step.'; }
+  else b.className = 'banner';
+  document.querySelectorAll('[data-clock]').forEach(el => {
+    const c = S.clocks[el.dataset.clock]; if (!c) return;
+    const l = 600 - (Date.now() - c) / 1000;
+    el.textContent = l > 0 ? mmss(l) + ' left' : 'TIME. Mike, what is the call?';
+    el.style.color = l > 60 ? '' : 'var(--bad)';
+  });
+}
+setInterval(tick, 500);
+
+/* ---------- navigation ---------- */
+function goTo(i) {
+  if (i < 0 || i >= STEPS.length) return;
+  const done = Object.assign({}, st().done || {}); if (i > S.cur) done[S.cur] = true;
+  S.cur = i; resetStepTimer();
+  saveState({ cur: i, done });
+  render(); window.scrollTo(0, 0);
+}
+$('backBtn').onclick = () => goTo(S.cur - 1);
+$('nextBtn').onclick = () => goTo(S.cur + 1);
+
+/* ---------- render ---------- */
+function render() {
+  if (!D()) return;
+  const m = D().meeting;
+  $('mlabel').textContent = m.label + ' · form due ' + m.due;
+  $('m-mon').setAttribute('aria-pressed', S.mode === 'Monday');
+  $('m-fri').setAttribute('aria-pressed', S.mode === 'Friday');
+  const done = st().done || {};
+  $('rail').innerHTML = STEPS.map((s, i) => `<button class="step${done[i] ? ' done' : ''}" data-i="${i}" ${i === S.cur ? 'aria-current="step"' : ''}>
+    <span class="no">${done[i] && i !== S.cur ? '✓' : i + 1}</span><span class="n">${esc(s.n)}</span><span class="mm">${s.m} min</span></button>`).join('');
+  document.querySelectorAll('.step').forEach(b => b.onclick = () => goTo(+b.dataset.i));
+  $('backBtn').disabled = S.cur === 0;
+  $('nextBtn').style.visibility = S.cur === STEPS.length - 1 ? 'hidden' : 'visible';
+  const s = STEPS[S.cur];
+  $('stage').innerHTML =
+    `<div class="kicker">STEP ${S.cur + 1} OF ${STEPS.length} · ${s.m} MINUTES</div><h1>${esc(s.n)}</h1>
+     <div class="how"><div><b>WHAT TO DO</b>${esc(pick(s.what))}</div><div><b>SAY THIS</b><span class="say">"${esc(pick(s.say))}"</span></div></div>` +
+    VIEWS[s.kind]();
+  wire();
+  tick();
+}
+
+function noUpdate(name) { return `<div class="card none"><div class="who">${esc(name)}<span class="tag grey">NO UPDATE YET</span></div><div class="muted">No form for this meeting.</div></div>`; }
+function formTag(p) {
+  if (!p.fillsForm) return '<span class="tag grey">NO FORM NEEDED</span>';
+  const u = upd(p.name);
+  return !u ? '<span class="tag grey">NO UPDATE YET</span>' : u.onTime === 'LATE' ? '<span class="tag bad">FORM LATE</span>' : '<span class="tag good">✓ FORM IN</span>';
+}
+
+const VIEWS = {
+  personal() {
+    const live = D().pointsLive;
+    const chk = st().checked || {};
+    const left = people().filter(p => !chk[p.name]).length;
+    return `<div class="counts"><span class="count">${people().length - left} of ${people().length} done</span></div><div class="grid">` +
+      people().map(p => {
+        const on = !!chk[p.name];
+        return `<div class="card"><div class="who">${esc(p.name)}${formTag(p)}</div>
+          <div class="row" style="margin-top:10px"><button class="pick yes" data-act="check" data-name="${esc(p.name)}" aria-pressed="${on}">${on ? '✓ Done' : 'Tap when done'}</button></div>
+          ${live ? `<div class="row" style="margin-top:10px">
+            <button class="btn small" data-act="point" data-name="${esc(p.name)}" data-pts="1" data-why="Late to the meeting">Late +1</button>
+            <button class="btn small" data-act="point" data-name="${esc(p.name)}" data-pts="2" data-why="Missed the meeting without telling the facilitator">Not here +2</button>
+            <span class="muted">${D().points[p.name] || 0} pts this month</span></div>` : ''}
+        </div>`;
+      }).join('') + '</div>' +
+      (live ? '' : `<p class="muted">Practice weeks: no points until ${esc(D().pointsStart)}.</p>`) +
+      '<p class="muted">Private answers from the form never show here. Only Mike and Jordan see those.</p>';
+  },
+  clear() {
+    const th = st().thumbs || {};
+    const downs = people().filter(p => th[p.name] === 'down').map(p => p.name);
+    return `<div class="grid">` + people().map(p => `<div class="card"><div class="who">${esc(p.name)}</div>
+      <div class="row"><button class="pick yes" data-act="thumb" data-v="up" data-name="${esc(p.name)}" aria-pressed="${th[p.name] === 'up'}">👍 Up</button>
+      <button class="pick no" data-act="thumb" data-v="down" data-name="${esc(p.name)}" aria-pressed="${th[p.name] === 'down'}">👎 Down</button></div></div>`).join('') + '</div>' +
+      (downs.length ? `<div class="banner on over" style="margin-top:18px">Thumbs down: ${esc(downs.join(', '))}. Talk 1-on-1 right after the meeting.</div>` : '');
+  },
+  snapshot() {
+    const rows = D().snapshot;
+    if (!rows.length) return `<div class="empty">The Snapshot is empty. Seattal or Jordan fills it in before the meeting.<br><br><a class="btn" href="${esc(D().links.sheet)}" target="_blank">Open the SNAPSHOT tab</a></div>`;
+    return '<table class="snap">' + rows.map(r => {
+      const v = /off track/i.test(r.value) ? `<span class="tag fill-bad">OFF TRACK</span>` : /on track/i.test(r.value) ? `<span class="tag fill-good">ON TRACK</span>` : esc(r.value);
+      return `<tr><td>${esc(r.what)}${r.note ? `<div class="muted" style="font-size:18px">${esc(r.note)}</div>` : ''}</td><td class="v">${v}</td></tr>`;
+    }).join('') + '</table>';
+  },
+  weekly() {
+    const fri = S.mode === 'Friday';
+    return '<div class="grid">' + formPeople().map(p => {
+      const u = upd(p.name);
+      if (!u) return noUpdate(p.name);
+      let body;
+      if (fri) {
+        body = '<ul style="list-style:none;padding:0">' + u.goals.map(g => `<li class="row" style="justify-content:space-between;flex-wrap:nowrap"><span>${esc(g.text.replace(/[:\-–]?\s*\b(hit|missed?)\b\.?\s*$/i, ''))}</span>${g.result === 'Hit' ? '<span class="tag fill-good">✓ HIT</span>' : g.result === 'Missed' ? '<span class="tag fill-bad">✗ MISSED</span>' : '<span class="tag grey">?</span>'}</li>`).join('') + '</ul>';
+        if (u.mondayGoals.length) body += `<div class="muted" style="font-size:16px;margin-top:8px">Monday's goals: ${esc(u.mondayGoals.join(' · '))}</div>`;
+      } else body = '<ol>' + u.goals.map(g => `<li>${esc(g.text)}</li>`).join('') + '</ol>';
+      const missed = u.goals.some(g => g.result === 'Missed');
+      return `<div class="card${fri && missed ? ' off' : ''}"><div class="who">${esc(p.name)}<span class="muted" style="font-size:16px;font-weight:400">${esc(u.team)}</span></div>${body}</div>`;
+    }).join('') + '</div>' + (fri ? '<p class="muted">Missed goals were added to the Issues List by themselves.</p>' : '');
+  },
+  monthly() {
+    const list = formPeople().slice().sort((a, b) => ((upd(b.name) || {}).monthly === 'Off Track') - ((upd(a.name) || {}).monthly === 'Off Track'));
+    return '<div class="grid">' + list.map(p => {
+      const u = upd(p.name); if (!u) return noUpdate(p.name);
+      const off = u.monthly === 'Off Track';
+      return `<div class="card${off ? ' off' : ''}"><div class="who">${esc(p.name)}${off ? '<span class="tag fill-bad">✗ OFF TRACK</span>' : '<span class="tag fill-good">✓ ON TRACK</span>'}</div><div class="big">${esc(u.monthlyNote)}</div></div>`;
+    }).join('') + '</div>';
+  },
+  headlines() {
+    return '<div class="grid">' + formPeople().map(p => {
+      const u = upd(p.name); if (!u) return noUpdate(p.name);
+      return `<div class="card"><div class="who">${esc(p.name)}</div><div class="big">${u.headline ? esc(u.headline) : '<span class="muted">No headline.</span>'}</div></div>`;
+    }).join('') + '</div>';
+  },
+  todos() {
+    const list = D().todosReview;
+    const lr = D().lastRecap;
+    const top = lr ? `<p><a href="${esc(lr.url)}" target="_blank">Open last meeting's recap</a></p>` : '';
+    if (!list.length) return top + '<div class="empty">No To-Dos from last meeting. (This is normal at the first meeting.)</div>';
+    const done = list.filter(t => t.checked === key() && t.status === 'Done').length;
+    const owners = [...new Set(list.map(t => t.owner))];
+    return top + `<div class="counts"><span class="count">${done} of ${list.length} Done</span></div>` + owners.map(o =>
+      `<div class="section">${esc(o || 'NO NAME')}</div>` + list.filter(t => t.owner === o).map(t => {
+        const s = t.checked === key() ? t.status : '';
+        return `<div class="issue"><div class="txt">${esc(t.todo)}</div>
+          <div class="muted">Due ${esc(day(t.due) || 'no date')}${t.formSays ? ' · Form says: <b class="soft">' + esc(t.formSays) + '</b>' : ''}${t.notDone ? ' · Not Done before: ' + t.notDone + 'x' : ''}</div>
+          <div class="row" style="margin-top:10px"><button class="pick yes" data-act="todo" data-row="${t.row}" data-v="Done" aria-pressed="${s === 'Done'}">✓ DONE</button>
+          <button class="pick no" data-act="todo" data-row="${t.row}" data-v="Not Done" aria-pressed="${s === 'Not Done'}">✗ NOT DONE</button></div></div>`;
+      }).join('')).join('');
+  },
+  issues() {
+    const all = D().issues.filter(x => !x.later);
+    const isOpen = x => x.answer !== 'Yes' && x.answer !== 'No';
+    const askers = [...new Set(all.map(x => x.askedBy).filter(Boolean))].sort();
+    const shown = all.filter(x => S.filter === 'All' || x.askedBy === S.filter);
+    const open = all.filter(isOpen);
+    const urgent = open.filter(x => x.urgent || x.compliance).length;
+    const answered = all.filter(x => x.answeredOn === key() && x.answer).length;
+    const rank = x => (isOpen(x) ? 0 : 10) + (x.compliance ? 0 : x.urgent ? 1 : x.deep ? 2 : 3);
+    const group = (title, list) => !list.length ? '' : `<div class="section">${title} (${list.length})</div>` +
+      list.sort((a, b) => rank(a) - rank(b) || a.num - b.num).map(issueCard).join('');
+    const forMike = shown.filter(x => x.forWho === 'Mike'), forAaron = shown.filter(x => x.forWho === 'Aaron');
+    const other = shown.filter(x => x.forWho !== 'Mike' && x.forWho !== 'Aaron');
+    return `<div class="counts"><span class="count">${open.length} open</span><span class="count bad">${urgent} urgent</span><span class="count">${answered} answered today</span></div>
+      <div class="soft" style="font-size:16px;letter-spacing:2px;font-weight:700">WHO'S ASKING? TAP A NAME</div>
+      <div class="chips">${['All'].concat(askers).map(n => `<button class="chip" data-act="filter" data-name="${esc(n)}" aria-pressed="${S.filter === n}">${esc(n)}</button>`).join('')}</div>` +
+      (shown.length ? group('ASKS FOR MIKE', forMike) + group('ASKS FOR AARON', forAaron) + group('OTHER ISSUES', other) : '<div class="empty">Nothing on the Issues List.</div>') +
+      `<div class="section">ADD AN ISSUE</div>
+      <div class="issue"><label>What is the issue?</label><input type="text" id="ni-ask" placeholder="One sentence">
+        <div class="row" style="margin-top:10px"><div style="flex:1;min-width:180px"><label>Who is it for?</label><select id="ni-for"><option>Mike</option><option>Aaron</option><option>Someone else</option></select></div>
+        <div style="flex:1;min-width:180px"><label>Who is raising it?</label><select id="ni-by">${nameOptions('')}</select></div></div>
+        <div class="row" style="margin-top:12px"><label style="margin:0"><input type="checkbox" id="ni-urgent"> Urgent</label>
+        <button class="btn white" data-act="addIssue" style="margin-left:auto">Add to the list</button></div></div>`;
+  },
+  wrap() {
+    const news = D().todosNew;
+    const r = st().ratings || {};
+    const vals = Object.values(r).map(Number).filter(Boolean);
+    const avg = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : '';
+    const recap = D().recap;
+    return `<div class="section">NEW TO-DOS (${news.length})</div>` +
+      (news.length ? news.map(t => `<div class="issue row" style="justify-content:space-between"><div><div class="txt">${esc(t.owner)}: ${esc(t.todo)}</div><div class="muted">Due ${esc(day(t.due) || 'no date')}</div></div>
+        <button class="btn small" data-act="delTodo" data-row="${t.row}">Remove</button></div>`).join('') : '<div class="empty">No new To-Dos yet. Add them below, or say Yes on an issue in Problem Solving.</div>') +
+      `<div class="issue"><div class="row"><div style="flex:1;min-width:160px"><label>Who</label><select id="nt-owner">${nameOptions('')}</select></div>
+        <div style="flex:3;min-width:240px"><label>What</label><input type="text" id="nt-what" placeholder="Example: Send 3 tin quotes to Aaron"></div>
+        <div style="flex:1;min-width:160px"><label>By when</label><input type="date" id="nt-due" value="${plusDays(7)}"></div></div>
+        <div class="row" style="margin-top:12px"><span class="muted">One name. One date. "We" is nobody.</span><button class="btn white" data-act="addTodo" style="margin-left:auto">Add To-Do</button></div></div>` +
+      `<div class="section">RATE THE MEETING 1 TO 10 ${avg ? '· AVERAGE ' + avg : ''}</div>` +
+      people().map(p => `<div class="row" style="margin:8px 0"><div style="width:120px;font-weight:800">${esc(p.name)}</div><div class="rate">` +
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button data-act="rate" data-name="${esc(p.name)}" data-v="${n}" aria-pressed="${+r[p.name] === n}">${n}</button>`).join('') +
+        `</div>${r[p.name] && r[p.name] < 8 ? '<span class="tag bad">Under 8: say why</span>' : ''}</div>`).join('') +
+      `<div class="section">FINISH</div>` +
+      (recap ? `<div class="recapbox">✓ Recap made. <a href="${esc(recap.url)}" target="_blank">Open the recap</a><br><span style="font-size:18px">The email to the team is waiting in your Gmail Drafts. Open it and press Send.</span></div>
+        <p><button class="btn small" data-act="finish">Make the recap again</button></p>`
+        : `<p class="soft">This makes a recap doc for the whole team and puts an email in your Gmail Drafts. Private answers are never in it.</p>
+        <button class="btn white" data-act="finish" style="font-size:24px;padding:16px 30px">✓ Finish meeting &amp; make the recap</button>`);
+  }
+};
+
+function issueCard(x) {
+  const today = x.answeredOn === key();
+  const ans = x.answer || '';
+  const hot = x.compliance || x.urgent;
+  return `<div class="issue${hot && !ans ? ' hot' : ''}${ans === 'Yes' || ans === 'No' ? ' answered' : ''}" data-row="${x.row}">
+    <div class="row">${x.compliance ? '<span class="tag fill-bad">COMPLIANCE</span>' : ''}${x.urgent ? '<span class="tag bad">URGENT</span>' : ''}${x.deep ? '<span class="tag">DEEP DIVE</span>' : ''}
+      <span class="muted" style="font-size:16px">#${esc(x.num)} · ${esc(x.askedBy || '?')}${x.team ? ' · ' + esc(x.team) : ''}${x.added ? ' · added ' + esc(day(x.added)) : ''}</span>
+      <button class="btn small" data-act="clock" data-row="${x.row}" style="margin-left:auto">10-min clock</button><span class="mini" data-clock="${x.row}"></span></div>
+    <div class="txt">${esc(x.ask)}</div>
+    <label>MIKE'S CALL</label>
+    <div class="row">${['Yes', 'No', 'Next meeting'].map(a => `<button class="pick ${a === 'Yes' ? 'yes' : a === 'No' ? 'no' : ''}" data-act="answer" data-row="${x.row}" data-v="${a}" aria-pressed="${ans === a}">${a.toUpperCase()}</button>`).join('')}</div>
+    <label>MIKE'S DECISION (IN WORDS)</label>
+    <textarea rows="2" data-field="decision" data-row="${x.row}" placeholder="What are we doing?">${esc(x.decision)}</textarea>
+    ${ans === 'Yes' ? `<div class="row" style="margin-top:8px"><div style="flex:1;min-width:160px"><label>Who does it</label><select data-field="owner" data-row="${x.row}">${nameOptions(x.owner)}</select></div>
+      <div style="flex:1;min-width:160px"><label>By when</label><input type="date" data-field="due" data-row="${x.row}" value="${esc(x.due || plusDays(7))}"></div>
+      <button class="btn white" data-act="makeTodo" data-row="${x.row}" style="align-self:flex-end">Save as To-Do</button></div>` : ''}
+    <div class="row" style="margin-top:10px;justify-content:flex-end"><button class="btn small" data-act="later" data-row="${x.row}">Off topic: later</button>
+      <button class="btn small" data-act="done" data-row="${x.row}">Take off the list</button></div></div>`;
+}
+
+/* ---------- clicks + typing ---------- */
+function wire() {
+  document.querySelectorAll('[data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b.dataset, b));
+  document.querySelectorAll('[data-field]').forEach(el => el.onchange = () => {
+    const row = +el.dataset.row, f = el.dataset.field;
+    const x = D().issues.find(i => i.row === row); if (x) x[f] = el.value;
+    call('decideIssue', [row, { [f]: el.value }, key()], () => toast('Saved'));
+  });
+}
+function act(a, d) {
+  const k = key();
+  if (a === 'check') { saveState({ checked: { [d.name]: !(st().checked || {})[d.name] } }); render(); }
+  if (a === 'thumb') { saveState({ thumbs: { [d.name]: d.v } }); render(); }
+  if (a === 'point') { if (confirm(`Give ${d.name} ${d.pts} point(s) for: ${d.why}?`)) call('addPoint', [d.name, +d.pts, d.why, k], () => { toast('Point added'); load(); }); }
+  if (a === 'filter') { S.filter = d.name; render(); }
+  if (a === 'todo') { const t = D().todosReview.find(x => x.row === +d.row); t.status = d.v; t.checked = k; render(); call('setTodoStatus', [+d.row, d.v, k], () => load()); }
+  if (a === 'answer') {
+    const x = D().issues.find(i => i.row === +d.row); const v = x.answer === d.v ? '' : d.v;
+    x.answer = v; x.answeredOn = v ? k : ''; render();
+    call('decideIssue', [+d.row, { answer: v }, k], () => toast(v ? 'Mike said: ' + v : 'Cleared'));
+  }
+  if (a === 'makeTodo') {
+    const card = document.querySelector(`.issue[data-row="${d.row}"]`);
+    const owner = card.querySelector('[data-field="owner"]').value, due = card.querySelector('[data-field="due"]').value;
+    const decision = card.querySelector('[data-field="decision"]').value;
+    if (!owner || !due) { toast('Pick who does it and by when'); return; }
+    call('decideIssue', [+d.row, { owner, due, decision, makeTodo: true }, k], () => { toast('To-Do saved'); load(); });
+  }
+  if (a === 'done' || a === 'later') {
+    if (!confirm(a === 'done' ? 'Take this off the Issues List?' : 'Move this to "later"? It leaves the board but stays in the sheet.')) return;
+    D().issues = D().issues.filter(i => i.row !== +d.row); render();
+    call('decideIssue', [+d.row, { [a]: true }, k], () => toast('Done'));
+  }
+  if (a === 'clock') { S.clocks[d.row] = Date.now(); tick(); }
+  if (a === 'addIssue') {
+    const ask = $('ni-ask').value.trim(); if (!ask) { toast('Write the issue first'); return; }
+    call('addIssue', [{ ask, forWho: $('ni-for').value, askedBy: $('ni-by').value, urgent: $('ni-urgent').checked }, k], () => { toast('Added'); load(); });
+  }
+  if (a === 'addTodo') {
+    const owner = $('nt-owner').value, todo = $('nt-what').value.trim(), due = $('nt-due').value;
+    if (!owner || !todo || !due) { toast('Fill in who, what and by when'); return; }
+    call('addTodo', [{ owner, todo, due }, k], () => { toast('To-Do added'); load(); });
+  }
+  if (a === 'delTodo') { if (confirm('Remove this To-Do?')) call('deleteTodo', [+d.row], () => load()); }
+  if (a === 'rate') { saveState({ ratings: { [d.name]: +d.v } }); render(); }
+  if (a === 'finish') {
+    if (!confirm('Finish the meeting and make the recap?')) return;
+    $('stage').insertAdjacentHTML('beforeend', '<div class="empty" id="making">Making the recap… this takes about 20 seconds.</div>');
+    call('finishMeeting', [k, S.mode], r => { toast('Recap made'); window.open(r.url, '_blank'); load(); });
+  }
+}
+
+load(true);
+</script>
+</body>
+</html>
