@@ -506,12 +506,28 @@ function time24_(v) {
 /* ============================================================
  * 5. THE LIVE BOARD (web page)
  * ============================================================ */
-function doGet() {
+function doGet(e) {
+  const run = e && e.parameter && e.parameter.run;
+  if (run) return adminPage_(run);
   const t = HtmlService.createTemplateFromFile('Board');
   t.logo = '';
   try { t.logo = Utilities.base64Encode(DriveApp.getFileById(CONFIG.LOGO_ID).getBlob().getBytes()); } catch (e) {}
   return t.evaluate().setTitle('TGC Team Meeting').addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
+}
+
+// Facilitator-only links: <board URL>?run=setup | test | cleanup  (only works for CONFIG.FACILITATOR_EMAIL)
+function adminPage_(run) {
+  const me = String(Session.getActiveUser().getEmail() || '').toLowerCase();
+  let lines;
+  if (me !== CONFIG.FACILITATOR_EMAIL) lines = ['Only Seattal can use this link.'];
+  else {
+    const fn = { setup: setupNewBoard, test: testWithTestUser, cleanup: deleteTestData }[run];
+    try { lines = fn ? fn() : ['Unknown action.']; } catch (err) { lines = ['ERROR: ' + (err && err.message || err)]; }
+  }
+  const html = '<body style="background:#000;color:#fff;font:20px Arial;padding:30px"><h2>TGC board: ' + esc_(run) + '</h2>' +
+    (lines || []).map(l => '<p>' + esc_(l) + '</p>').join('') + '<p style="color:#aaa">Copy this page and send it to Claude.</p></body>';
+  return HtmlService.createHtmlOutput(html).setTitle('TGC board: ' + run);
 }
 
 function getBoard() {
