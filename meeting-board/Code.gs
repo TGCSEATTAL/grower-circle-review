@@ -522,7 +522,7 @@ function adminPage_(run) {
   let lines;
   if (me !== CONFIG.FACILITATOR_EMAIL) lines = ['Only Seattal can use this link.'];
   else {
-    const fn = { setup: setupNewBoard, test: testWithTestUser, cleanup: deleteTestData }[run];
+    const fn = { setup: setupNewBoard, test: testWithTestUser, cleanup: deleteTestData, testall: testThenAutoCleanup_ }[run];
     try { lines = fn ? fn() : ['Unknown action.']; } catch (err) { lines = ['ERROR: ' + (err && err.message || err)]; }
   }
   const html = '<body style="background:#000;color:#fff;font:20px Arial;padding:30px"><h2>TGC board: ' + esc_(run) + '</h2>' +
@@ -801,7 +801,17 @@ function testWithTestUser() {
   return out;
 }
 
+// Runs the test now, then deletes all test data by itself 15 minutes later (time to double-check it).
+function testThenAutoCleanup_() {
+  const out = testWithTestUser();
+  ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === 'deleteTestData').forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('deleteTestData').timeBased().after(15 * 60 * 1000).create();
+  PropertiesService.getScriptProperties().setProperty('LAST_TEST', JSON.stringify(out));
+  return out.concat(['All TEST USER data will delete itself in 15 minutes. You can close this page.']);
+}
+
 function deleteTestData() {
+  ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === 'deleteTestData').forEach(t => ScriptApp.deleteTrigger(t));
   const T = CONFIG.TEST_NAME; const ss = board_(); const out = [];
   withLock_(() => {
     [[TAB.UPD, UC.name, UN], [TAB.TODO, TC.owner, TN], [TAB.PTS, 2, 5]].forEach(([tab, col, n]) => {
