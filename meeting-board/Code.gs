@@ -102,6 +102,7 @@ function setupNewBoard() {
   let iss = ss.getSheetByName(TAB.ISS) || OLD_ISSUE_TABS.map(n => ss.getSheetByName(n)).find(Boolean);
   if (!iss) iss = ss.insertSheet(TAB.ISS);
   iss.setName(TAB.ISS);
+  log.push(fixNotesFormulas());   // right away, so Meeting Notes is never left pointing at a missing tab
   if (iss.getMaxColumns() < IN) iss.insertColumnsAfter(iss.getMaxColumns(), IN - iss.getMaxColumns());
   styleHeader_(iss, ISSUE_HEAD);
   const n = iss.getMaxRows() - 1;
@@ -184,6 +185,7 @@ function setupNewBoard() {
 
   // WHO RUNS WHAT: add email, "in the meeting?" and "fills out the form?"
   const ppl = ss.getSheetByName(TAB.PEOPLE);
+  if (ppl.getMaxRows() < 60) ppl.insertRowsAfter(ppl.getMaxRows(), 60 - ppl.getMaxRows());
   if (ppl.getMaxColumns() < 5) ppl.insertColumnsAfter(ppl.getMaxColumns(), 5 - ppl.getMaxColumns());
   styleHeader_(ppl, ['NAME', 'IN CHARGE OF', 'EMAIL', 'IN THE MEETING?', 'FILLS OUT THE FORM?']);
   const pv = ppl.getRange(2, 1, 59, 5).getValues();
@@ -221,15 +223,20 @@ function setupNewBoard() {
 
   // Form: same link, new questions
   const form = FormApp.openById(CONFIG.FORM_ID);
-  buildForm_(form);
+  let dest = ''; try { dest = form.getDestinationId(); } catch (e) {}
+  if (dest) { form.removeDestination(); log.push('Form was linked to a responses sheet (' + dest + '). Unlinked it so private answers can never land there. The old rows in that sheet are untouched.'); }
+  form.setPublishingSummary(false);
+  if (form.getItems().some(i => i.getTitle() === Q.PRIVATE)) {
+    log.push('Form already has the new questions. Left it alone (answers kept).');
+  } else {
+    log.push(archiveOldAnswers_(form, priv));
+    buildForm_(form);
+    log.push('Form rebuilt with the 7 questions. Link: ' + form.getPublishedUrl());
+  }
   refreshTodoQuestion_();
-  log.push('Form rebuilt with the 7 questions. Link: ' + form.getPublishedUrl());
-  try { if (form.getDestinationId()) log.push('WARNING: the form is linked to a responses sheet (' + form.getDestinationId() + '). Question 7 answers land there too. Unlink it: Form > Responses > ⋮ > Unlink form.'); } catch (e) {}
 
   installTriggers();
   log.push('Form trigger installed. (Old Friday summary email trigger removed. The recap replaces it.)');
-
-  log.push(fixNotesFormulas());
 
   PropertiesService.getScriptProperties().setProperties({ FORM_URL: form.getPublishedUrl(), BOARD_ID: CONFIG.BOARD_ID, FORM_ID: CONFIG.FORM_ID, PRIVATE_ID: CONFIG.PRIVATE_ID });
   Logger.log('\n' + log.join('\n'));
@@ -389,14 +396,33 @@ function handleResponse_(resp) {
 
   // 4. PRIVATE (question 7): private sheet only
   const priv = String(a[Q.PRIVATE] || '').trim();
-  const psh = SpreadsheetApp.openById(CONFIG.PRIVATE_ID).getSheets()[0];
-  const plast = psh.getLastRow();
-  const pids = plast > 1 ? psh.getRange(2, 5, plast - 1, 1).getValues().map(x => x[0]) : [];
-  const pr = pids.indexOf(id);
-  if (priv) {
-    const prow = [when, name, m.label, priv, id];
-    if (pr > -1) psh.getRange(pr + 2, 1, 1, 5).setValues([prow]); else psh.appendRow(prow);
-  } else if (pr > -1) psh.deleteRow(pr + 2);
+  withLock_(() => {
+    const psh = SpreadsheetApp.openById(CONFIG.PRIVATE_ID).getSheets()[0];
+    const plast = psh.getLastRow();
+    const pids = plast > 1 ? psh.getRange(2, 5, plast - 1, 1).getValues().map(x => x[0]) : [];
+    const pr = pids.indexOf(id);
+    if (priv) {
+      const prow = [when, name, m.label, priv, id];
+      if (pr > -1) psh.getRange(pr + 2, 1, 1, 5).setValues([prow]); else psh.appendRow(prow);
+    } else if (pr > -1) psh.deleteRow(pr + 2);
+  });
+}
+
+// Before the old questions are deleted, copy every old answer to an archive tab in the PRIVATE sheet
+// (old answers may include private ones, so they go to the private sheet, not the board).
+function archiveOldAnswers_(form, priv) {
+  const resps = form.getResponses();
+  if (!resps.length) return 'Form had no old answers to save.';
+  const titles = form.getItems().filter(i => i.getType() !== FormApp.ItemType.PAGE_BREAK && i.getType() !== FormApp.ItemType.SECTION_HEADER).map(i => i.getTitle());
+  const rows = resps.map(r => {
+    const a = {}; r.getItemResponses().forEach(ir => { const v = ir.getResponse(); a[ir.getItem().getTitle()] = Array.isArray(v) ? v.join(', ') : v; });
+    return [r.getTimestamp()].concat(titles.map(t => a[t] == null ? '' : String(a[t])));
+  });
+  const sh = priv.getSheetByName('OLD FORM ANSWERS') || priv.insertSheet('OLD FORM ANSWERS');
+  sh.clear();
+  sh.getRange(1, 1, 1, titles.length + 1).setValues([['SUBMITTED'].concat(titles)]).setFontWeight('bold');
+  sh.getRange(2, 1, rows.length, titles.length + 1).setValues(rows);
+  return `Saved ${rows.length} old form answers to the private sheet (tab OLD FORM ANSWERS) before replacing the questions.`;
 }
 
 function rawAnswers_(resp) {
@@ -418,7 +444,8 @@ function goalLines_(s) {
 function clearUnansweredFrom_(sh, formId) {
   const last = sh.getLastRow(); if (last < 2) return;
   const v = sh.getRange(2, 1, last - 1, IN).getValues();
-  v.forEach((r, i) => { if (r[IC.formId - 1] === formId && !r[IC.answer - 1]) clearIssueRow_(sh, i + 2); });
+  const untouched = r => !r[IC.answer - 1] && !r[IC.owner - 1] && !r[IC.due - 1] && !r[IC.decision - 1] && !r[IC.notes - 1] && r[IC.done - 1] !== true && r[IC.later - 1] !== true;
+  v.forEach((r, i) => { if (r[IC.formId - 1] === formId && untouched(r)) clearIssueRow_(sh, i + 2); });
 }
 function clearIssueRow_(sh, row) {
   sh.getRange(row, 1, 1, IN).clearContent();
@@ -623,7 +650,7 @@ function finishMeeting(meetingKey, mode) {
   const L = t => body.appendListItem(t).setGlyphType(DocumentApp.GlyphType.BULLET);
   H(title, DocumentApp.ParagraphHeading.HEADING1);
   P(`${mode === 'Friday' ? 'Friday meeting: score the week.' : 'Monday meeting: plan the week.'}  Meeting rating: ${avg || 'not rated'}${avg ? ' / 10' : ''}`);
-  P('Check this the same day. If something in your action plan is wrong, tell Seattal or Jordan right away.').setItalic(true);
+  P('Check this the same day. If something in your action plan is wrong, tell Seattal or Jordan right away.').editAsText().setItalic(true);
 
   // Action plan per person
   H('Your action plan (To-Dos)');
